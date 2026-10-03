@@ -1,21 +1,13 @@
 <div align="center">
 
-<img src="web/logo.png" width="128" alt="لوگوی پارسی‌گو">
-
 <h1 align="center">پارسی‌گو (تبدیل متن فارسی به گفتار)</h1>
 
 <p align="center"><b>pocket-tts-farsi-v2 — ONNX version setup</b></p>
 
 **فارسی** | [English](README.en.md)
 
-<a href="docs/demo.mp4"><img src="docs/demo-poster.jpg" width="640" alt="دموی ویدیویی پارسی‌گو — انتخاب صدا، تایپ متن و تولید گفتار در وب‌اپ"></a>
-
-https://github.com/user-attachments/assets/dfc735c3-65fb-473a-a437-747efd8ede20
-
-🎬 **دموی ویدیویی ۷۰ ثانیه‌ای (با صدا)** — انتخاب صدای مرجع، تولید جملهٔ نمونه،
-آپلود یک نمونهٔ صوتی ۵ ثانیه‌ای و کلونینگ آن روی یک پاراگراف بلند.
-(نسخهٔ دانلودی داخل ریپو: [docs/demo.mp4](docs/demo.mp4) — پوستر:
-[docs/demo-poster.jpg](docs/demo-poster.jpg))
+🎬 [دموی ویدیویی ۷۰ ثانیه‌ای](https://github.com/user-attachments/assets/dfc735c3-65fb-473a-a437-747efd8ede20)
+— نسخهٔ دانلودی داخل ریپو: [docs/demo.mp4](docs/demo.mp4)
 
 </div>
 
@@ -212,8 +204,6 @@ for f in config.json generation_config.json tokenizer_config.json added_tokens.j
 ```
 
 سپس در مرورگر: http://127.0.0.1:8000
-
-![نمای دموی وب پارسی‌گو](web/readme-demo.png)
 
 ### نحوهٔ کار با دمو
 

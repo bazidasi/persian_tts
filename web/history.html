@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پارسی‌گو — تاریخچه گفتار</title>
+<style>
+@font-face{
+  font-family:"Vazirmatn";
+  src:url("/fonts/Vazirmatn.woff2") format("woff2-variations"),url("fonts/Vazirmatn.woff2") format("woff2");
+  font-weight:100 900;
+  font-display:swap;
+}
+:root{
+  --bg:#0c0e13;
+  --surface:#141824;
+  --surface-2:#1a1f2e;
+  --border:#252b3d;
+  --text:#edeef2;
+  --muted:#8f96a8;
+  --faint:#5c6275;
+  --accent:#ff7a59;
+  --accent-2:#ffb454;
+  --on-accent:#231303;
+  --grad:linear-gradient(90deg,var(--accent),var(--accent-2));
+  --radius:18px;
+  --radius-s:12px;
+  --shadow:0 20px 60px rgba(0,0,0,.32);
+  --surface-glass:rgba(20,24,36,.88);
+  --border-soft:rgba(37,43,61,.78);
+  --border-strong:rgba(255,122,89,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh;
+  overflow-x:hidden;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 86% 4%,rgba(255,122,89,.1),transparent 28rem),
+    radial-gradient(circle at 8% 88%,rgba(255,180,84,.07),transparent 30rem),
+    var(--bg);
+  font-family:"Vazirmatn","Segoe UI",Tahoma,sans-serif;
+  font-size:14px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;border:0;cursor:pointer}
+button:disabled{cursor:wait}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  border-bottom:1px solid var(--border-soft);
+  background:rgba(12,14,19,.78);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.header-inner{display:flex;align-items:center;gap:14px;width:min(100%,1280px);min-height:70px;margin:0 auto;padding:10px 24px}
+.brand{display:flex;align-items:center;gap:10px;min-width:max-content}
+.brand-mark{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--grad);box-shadow:0 8px 24px rgba(255,122,89,.26)}
+.brand-mark svg{width:23px;height:23px;fill:none;stroke:var(--on-accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.brand-copy{display:flex;flex-direction:column;line-height:1.2}
+.brand-copy strong{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.brand-copy small{margin-top:3px;color:var(--faint);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.main-nav{display:flex;align-items:center;gap:4px;margin-inline-start:22px}
+.nav-link{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:5px 13px;border:1px solid transparent;border-radius:99px;color:var(--muted);background:transparent;font-size:12px;transition:color .18s,background .18s,border-color .18s}
+.nav-link svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-link:hover{color:var(--text);background:rgba(26,31,46,.78)}
+.nav-link.active{color:var(--text);border-color:rgba(255,122,89,.24);background:rgba(255,122,89,.1);font-weight:700}
+.header-spacer{flex:1}
+.history-page{width:min(100%,1280px);margin:0 auto;padding:42px 24px 150px}
+.history-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding-bottom:18px;border-bottom:1px solid var(--border-soft)}
+.history-kicker{color:var(--accent-2);font-size:10px;letter-spacing:.08em}
+.history-head h1{margin-top:4px;font-size:30px;font-weight:800;line-height:1.3;letter-spacing:-.7px}
+.history-head p{margin-top:5px;color:var(--muted);font-size:12px}
+.history-tools{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.history-count{color:var(--faint);font-size:10.5px}
+.clear-button{padding:7px 12px;border:1px solid var(--border);border-radius:99px;color:var(--muted);background:var(--surface-2);font-size:10px;transition:color .18s,border-color .18s,background .18s}
+.clear-button:hover{color:var(--text);border-color:var(--border-strong);background:rgba(255,122,89,.08)}
+.clear-button[hidden]{display:none}
+.history-list{display:grid;gap:9px;margin-top:18px}
+.history-row{display:flex;align-items:center;gap:13px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:var(--surface-glass);box-shadow:0 0 24px rgba(0,0,0,.1);transition:border-color .18s,background .18s,transform .18s}
+.history-row:hover{border-color:var(--border-strong);background:var(--surface-2);transform:translateX(-2px)}
+.history-play{display:grid;place-items:center;width:42px;height:42px;flex-shrink:0;border-radius:50%;color:var(--on-accent);background:var(--grad);box-shadow:0 6px 18px rgba(255,122,89,.25)}
+.history-play svg{width:16px;height:16px;fill:currentColor}
+.history-copy{min-width:0;flex:1}
+.history-copy strong{display:block;overflow:hidden;color:var(--text);font-size:13px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}
+.history-copy small{display:block;overflow:hidden;margin-top:3px;color:var(--muted);font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.history-duration{color:var(--faint);font-size:10.5px;white-space:nowrap}
+.history-actions{display:flex;align-items:center;gap:6px}
+.icon-button{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--border);border-radius:10px;color:var(--muted);background:var(--surface-2);transition:color .18s,border-color .18s,background .18s}
+.icon-button:hover{color:var(--text);border-color:var(--border-strong);background:rgba(255,122,89,.08)}
+.icon-button.danger:hover{color:var(--accent-2);border-color:rgba(255,180,84,.4);background:rgba(255,180,84,.08)}
+.icon-button svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.empty-state{display:flex;align-items:center;justify-content:center;min-height:300px;margin-top:18px;border:1px dashed var(--border);border-radius:var(--radius);color:var(--faint);background:rgba(20,24,36,.42);text-align:center}
+.empty-state[hidden]{display:none}
+.empty-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 13px;border:1px solid rgba(255,180,84,.22);border-radius:17px;color:var(--accent-2);background:rgba(255,180,84,.07)}
+.empty-icon svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.empty-state strong{display:block;color:var(--muted);font-size:13px}
+.empty-state p{margin-top:4px;font-size:10.5px}
+.empty-state a{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:7px 12px;border-radius:99px;color:var(--on-accent);background:var(--grad);font-size:10.5px;font-weight:700}
+.empty-state a svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.history-page footer{padding:28px 0 0;color:var(--faint);font-size:10px;text-align:center}
+.player{position:fixed;inset-inline:0;bottom:0;z-index:40;visibility:hidden;border-top:1px solid rgba(255,122,89,.2);background:rgba(20,24,36,.96);box-shadow:0 -14px 40px rgba(0,0,0,.32);transform:translateY(110%);transition:transform .3s ease,visibility .3s}
+.player.show{visibility:visible;transform:translateY(0)}
+.player-inner{display:grid;grid-template-columns:minmax(180px,1fr) minmax(280px,500px) auto;align-items:center;gap:22px;width:min(100%,1280px);min-height:82px;margin:0 auto;padding:10px 24px}
+.player-info{display:flex;align-items:center;gap:10px;min-width:0}
+.player-avatar{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:12px;color:var(--on-accent);background:var(--grad)}
+.player-avatar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.player-copy{min-width:0}
+.player-copy strong{display:block;overflow:hidden;font-size:11.5px;text-overflow:ellipsis;white-space:nowrap}
+.player-copy small{display:block;overflow:hidden;margin-top:2px;color:var(--muted);font-size:9.5px;text-overflow:ellipsis;white-space:nowrap}
+.player-main{display:flex;align-items:center;gap:11px;min-width:0}
+.play-button{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:50%;color:var(--on-accent);background:var(--grad);box-shadow:0 5px 16px rgba(255,122,89,.3)}
+.play-button svg{width:15px;height:15px;fill:currentColor}
+.seek{flex:1;min-width:80px;accent-color:var(--accent)}
+.time{min-width:72px;color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap}
+.download{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border:1px solid var(--border);border-radius:99px;color:var(--muted);background:var(--surface-2);font-size:10px;transition:color .18s,border-color .18s,background .18s}
+.download:hover{color:var(--text);border-color:var(--border-strong);background:rgba(255,122,89,.08)}
+.download svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;right:50%;bottom:108px;z-index:80;display:none;max-width:calc(100vw - 32px);padding:9px 17px;border:1px solid var(--border);border-radius:99px;color:var(--text);background:var(--surface-2);box-shadow:var(--shadow);font-size:11px;transform:translateX(50%);white-space:nowrap}
+.toast.show{display:block;animation:rise .25s ease}
+.toast.error{border-color:rgba(255,122,89,.45);color:var(--accent-2)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:700px){
+  .header-inner{flex-wrap:wrap;padding:10px 16px}
+  .header-spacer{display:none}
+  .main-nav{order:3;width:100%;margin:0;padding-top:2px}
+  .nav-link{flex:1;justify-content:center;padding-inline:8px}
+  .history-page{padding:30px 16px 145px}
+  .history-head{align-items:flex-start;flex-direction:column;gap:12px}
+  .history-head h1{font-size:25px}
+  .history-tools{width:100%;justify-content:space-between}
+  .history-row{gap:9px;padding:10px}
+  .history-duration{display:none}
+  .history-actions{gap:4px}
+  .icon-button{width:31px;height:31px}
+  .player-inner{grid-template-columns:1fr auto;gap:9px;min-height:94px;padding:9px 12px}
+  .player-info{grid-column:1;grid-row:1}
+  .player-main{grid-column:1/-1;grid-row:2}
+  .download{grid-column:2;grid-row:1;padding:9px}
+  .download span{display:none}
+  .toast{bottom:112px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="پارسی‌گو، استودیوی گفتار">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13.5h2l2-6 3 12 3-16 3 16 2-6h3"/></svg></span>
+      <span class="brand-copy"><strong>پارسی‌گو</strong><small>audio studio</small></span>
+    </a>
+    <nav class="main-nav" aria-label="ناوبری اصلی">
+      <a class="nav-link" href="/"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg><span>استودیو</span></a>
+      <a class="nav-link active" href="/history" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6M8 17h4"/></svg><span>تاریخچه</span></a>
+    </nav>
+    <span class="header-spacer"></span>
+  </div>
+</header>
+
+<main class="history-page">
+  <section class="history-head">
+    <div>
+      <div class="history-kicker">RECENT GENERATIONS</div>
+      <h1>تاریخچه گفتار</h1>
+      <p>خروجی‌های ساخته‌شده در این دستگاه را اینجا پیدا کنید.</p>
+    </div>
+    <div class="history-tools"><span class="history-count" id="count"></span><button class="clear-button" id="clear" type="button" hidden>پاک کردن همه</button></div>
+  </section>
+  <section class="history-list" id="list" aria-label="فهرست گفتارها"></section>
+  <section class="empty-state" id="empty">
+    <div><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 16 0 8 8 0 0 0-16 0Z"/><path d="M8 12h8M12 8v8"/></svg></div><strong>هنوز گفتاری ذخیره نشده</strong><p>اولین متن را در استودیو بنویسید تا خروجی اینجا نمایش داده شود.</p><a href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>رفتن به استودیو</a></div>
+  </section>
+  <footer>پارسی‌گو · خروجی‌ها فقط تا زمان اجرای سرور در دسترس هستند</footer>
+</main>
+
+<div class="player" id="player" aria-hidden="true" aria-label="پخش‌کننده گفتار">
+  <div class="player-inner">
+    <div class="player-info"><span class="player-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2l2-6 3 12 3-16 3 16 2-6h3"/></svg></span><span class="player-copy"><strong id="playerTitle">پخش گفتار</strong><small id="playerMeta">آماده پخش</small></span></div>
+    <div class="player-main"><button class="play-button" id="play" type="button" aria-label="پخش"><svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button><input class="seek" id="seek" type="range" min="0" max="100" step="0.1" value="0" aria-label="موقعیت پخش"><span class="time" id="time">۰:۰۰ / ۰:۰۰</span></div>
+    <a class="download" id="download" href="#" download="parsigo.wav"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 21h16"/></svg><span>دانلود WAV</span></a>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<audio id="audio" preload="auto"></audio>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const fa = value => String(value).replace(/\d/g, digit => "۰۱۲۳۴۵۶۷۸۹"[digit]);
+const fmt = seconds => {
+  const value = Math.max(0, Math.floor(Number(seconds) || 0));
+  return fa(Math.floor(value / 60)) + ":" + fa(String(value % 60).padStart(2, "0"));
+};
+const HISTORY_KEY = "parsigo-history-v1";
+const playIcon = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+const audio = $("audio");
+let entries = readEntries();
+let currentId = null;
+let currentUrl = null;
+let toastTimer = 0;
+
+function readEntries() {
+  try {
+    const value = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    return Array.isArray(value) ? value.filter(item => item && typeof item.id === "string").slice(0, 8) : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveEntries() {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, 8)));
+  } catch (error) {
+  }
+}
+
+function toast(message, type = "") {
+  const element = $("toast");
+  element.textContent = message;
+  element.className = "toast show" + (type ? " " + type : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { element.className = "toast"; }, 3200);
+}
+
+function setPlayIcon(playing) {
+  $("playIcon").style.display = playing ? "none" : "block";
+  $("pauseIcon").style.display = playing ? "block" : "none";
+  $("play").setAttribute("aria-label", playing ? "توقف" : "پخش");
+}
+
+function updateTime() {
+  const duration = Number(audio.duration) || 0;
+  const current = Number(audio.currentTime) || 0;
+  $("time").textContent = fmt(current) + " / " + fmt(duration);
+  $("seek").value = duration ? String(current / duration * 100) : "0";
+}
+
+function render() {
+  const hasEntries = entries.length > 0;
+  $("count").textContent = hasEntries ? fa(entries.length) + " گفتار" : "بدون گفتار";
+  $("clear").hidden = !hasEntries;
+  $("empty").hidden = hasEntries;
+  $("list").replaceChildren();
+  if (!hasEntries) return;
+  entries.forEach(item => {
+    const row = document.createElement("article");
+    row.className = "history-row";
+    const play = document.createElement("button");
+    play.type = "button";
+    play.className = "history-play";
+    play.setAttribute("aria-label", "پخش گفتار");
+    play.innerHTML = playIcon;
+    const copy = document.createElement("div");
+    copy.className = "history-copy";
+    const text = document.createElement("strong");
+    text.textContent = item.text || "گفتار بدون متن";
+    const meta = document.createElement("small");
+    meta.textContent = (item.voice || "صدای انتخاب‌شده") + " · " + (item.mode === "pack" ? "یکپارچه و روان" : "مکث ویرگول‌ها");
+    copy.append(text, meta);
+    const duration = document.createElement("span");
+    duration.className = "history-duration";
+    duration.textContent = fa(item.dur) + " ثانیه";
+    const actions = document.createElement("div");
+    actions.className = "history-actions";
+    const download = document.createElement("a");
+    download.className = "icon-button";
+    download.href = "/api/audio/" + encodeURIComponent(item.id);
+    download.download = "parsigo.wav";
+    download.setAttribute("aria-label", "دانلود گفتار");
+    download.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 21h16"/></svg>';
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "icon-button danger";
+    remove.setAttribute("aria-label", "حذف گفتار");
+    remove.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 11v5m4-5v5M9 7V4h6v3m-9 0 1 13h10l1-13"/></svg>';
+    actions.append(download, remove);
+    row.append(play, copy, duration, actions);
+    play.addEventListener("click", () => playEntry(item));
+    remove.addEventListener("click", () => {
+      entries = entries.filter(entry => entry.id !== item.id);
+      saveEntries();
+      if (currentId === item.id) stopAudio();
+      render();
+      toast("گفتار از تاریخچه حذف شد");
+    });
+    $("list").append(row);
+  });
+}
+
+async function playEntry(item) {
+  if (currentId === item.id && !audio.paused) {
+    audio.pause();
+    setPlayIcon(false);
+    return;
+  }
+  currentId = item.id;
+  $("player").classList.add("show");
+  $("player").setAttribute("aria-hidden", "false");
+  $("playerTitle").textContent = item.text || "پخش گفتار";
+  $("playerMeta").textContent = item.voice || "صدای انتخاب‌شده";
+  $("download").href = "/api/audio/" + encodeURIComponent(item.id);
+  try {
+    const response = await fetch("/api/audio/" + encodeURIComponent(item.id));
+    if (!response.ok) throw new Error("فایل صوتی در دسترس نیست");
+    const buffer = await response.arrayBuffer();
+    if (currentUrl) URL.revokeObjectURL(currentUrl);
+    currentUrl = URL.createObjectURL(new Blob([buffer], { type: "audio/wav" }));
+    audio.src = currentUrl;
+    await audio.play();
+    setPlayIcon(true);
+  } catch (error) {
+    toast(error.message || "پخش گفتار انجام نشد", "error");
+    setPlayIcon(false);
+  }
+}
+
+function stopAudio() {
+  audio.pause();
+  audio.removeAttribute("src");
+  audio.load();
+  currentId = null;
+  $("player").classList.remove("show");
+  $("player").setAttribute("aria-hidden", "true");
+  setPlayIcon(false);
+  updateTime();
+}
+
+$("play").addEventListener("click", () => {
+  if (!audio.src) return;
+  if (audio.paused) audio.play().then(() => setPlayIcon(true)).catch(() => toast("پخش در این مرورگر مجاز نیست", "error"));
+  else {
+    audio.pause();
+    setPlayIcon(false);
+  }
+});
+$("seek").addEventListener("input", () => {
+  if (audio.duration) audio.currentTime = Number($("seek").value) / 100 * audio.duration;
+});
+audio.addEventListener("timeupdate", updateTime);
+audio.addEventListener("loadedmetadata", updateTime);
+audio.addEventListener("ended", () => setPlayIcon(false));
+$("clear").addEventListener("click", () => {
+  if (!entries.length || !window.confirm("همه‌ی گفتارهای ذخیره‌شده حذف شوند؟")) return;
+  entries = [];
+  saveEntries();
+  stopAudio();
+  render();
+  toast("تاریخچه پاک شد");
+});
+render();
+</script>
+</body>
+</html>

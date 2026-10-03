@@ -3,578 +3,1261 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>پارسی‌گو — تبدیل متن فارسی به گفتار</title>
+<title>پارسی‌گو — استودیوی گفتار فارسی</title>
 <style>
-/* Vazirmatn v33.003 (SIL OFL 1.1, see fonts/OFL.txt) — bundled so the demo
-   stays fully offline; variable weight covers the 400-800 weights used here */
 @font-face{
   font-family:"Vazirmatn";
-  src:url("fonts/Vazirmatn.woff2") format("woff2-variations"),
-      url("fonts/Vazirmatn.woff2") format("woff2");
-  font-weight:100 900; font-display:swap;
+  src:url("/fonts/Vazirmatn.woff2") format("woff2-variations"),url("fonts/Vazirmatn.woff2") format("woff2");
+  font-weight:100 900;
+  font-display:swap;
 }
 :root{
-  --bg:#0c0e13; --surface:#141824; --surface-2:#1a1f2e; --border:#252b3d;
-  --text:#edeef2; --muted:#8f96a8; --faint:#5c6275;
-  --accent:#ff7a59; --accent-2:#ffb454; --on-accent:#231303;
+  --bg:#0c0e13;
+  --surface:#141824;
+  --surface-2:#1a1f2e;
+  --border:#252b3d;
+  --text:#edeef2;
+  --muted:#8f96a8;
+  --faint:#5c6275;
+  --accent:#ff7a59;
+  --accent-2:#ffb454;
+  --on-accent:#231303;
   --grad:linear-gradient(90deg,var(--accent),var(--accent-2));
-  --radius:14px; --radius-s:10px;
-  --shadow:0 12px 40px rgba(0,0,0,.35);
+  --radius:18px;
+  --radius-s:12px;
+  --shadow:0 20px 60px rgba(0,0,0,.32);
+  --surface-glass:rgba(20,24,36,.88);
+  --surface-raised:rgba(26,31,46,.9);
+  --border-soft:rgba(37,43,61,.78);
+  --border-strong:rgba(255,122,89,.5);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+html{scroll-behavior:smooth}
 body{
-  background:var(--bg); color:var(--text);
-  font-family:"Vazirmatn","Segoe UI",Tahoma,sans-serif;
-  line-height:1.8; -webkit-font-smoothing:antialiased;
+  min-height:100vh;
   overflow-x:hidden;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 86% 4%,rgba(255,122,89,.1),transparent 28rem),
+    radial-gradient(circle at 8% 88%,rgba(255,180,84,.07),transparent 30rem),
+    var(--bg);
+  font-family:"Vazirmatn","Segoe UI",Tahoma,sans-serif;
+  font-size:14px;
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
 }
-.orb{position:fixed;border-radius:50%;filter:blur(110px);opacity:.16;pointer-events:none;z-index:0}
-.orb.a{width:420px;height:420px;background:var(--accent);top:-160px;left:-120px}
-.orb.b{width:380px;height:380px;background:var(--accent-2);bottom:-180px;right:-100px;opacity:.10}
-
-.wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:28px 22px 60px}
-
-/* ---------- header ---------- */
-header{display:flex;align-items:center;gap:14px;margin-bottom:30px}
-.logo{width:44px;height:44px;border-radius:12px;background:var(--grad);
-  display:grid;place-items:center;flex-shrink:0;box-shadow:0 6px 20px rgba(255,122,89,.35)}
-.logo svg{width:24px;height:24px;stroke:var(--on-accent)}
-h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
-.sub{font-size:12.5px;color:var(--muted);margin-top:-4px}
-.badge{margin-inline-start:auto;font-size:11.5px;color:var(--accent-2);
-  border:1px solid rgba(255,180,84,.28);background:rgba(255,180,84,.07);
-  padding:5px 12px;border-radius:99px;white-space:nowrap}
-
-/* ---------- layout ---------- */
-.grid{display:grid;grid-template-columns:1fr 316px;gap:18px;align-items:start}
-@media(max-width:860px){.grid{grid-template-columns:1fr}}
-
-.panel{background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:20px}
-
-.label{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between}
-.label .cnt{font-weight:400;color:var(--faint);font-size:12px}
-
-textarea{
-  width:100%;min-height:150px;resize:vertical;
-  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-s);
-  color:var(--text);font:inherit;font-size:15.5px;padding:14px 16px;outline:none;
-  transition:border-color .2s;
+body:before{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  content:"";
+  opacity:.24;
+  background-image:linear-gradient(rgba(37,43,61,.16) 1px,transparent 1px),linear-gradient(90deg,rgba(37,43,61,.16) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 72%);
 }
-textarea:focus{border-color:rgba(255,122,89,.55)}
-textarea::placeholder{color:var(--faint)}
+button,input,textarea{font:inherit}
+button{border:0;cursor:pointer}
+button:disabled{cursor:wait}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(255,122,89,.35);color:var(--text)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+svg{display:block}
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  border-bottom:1px solid var(--border-soft);
+  background:rgba(12,14,19,.78);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.header-inner{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  width:min(100%,1280px);
+  min-height:70px;
+  margin:0 auto;
+  padding:10px 24px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:max-content}
+.brand-mark{
+  display:grid;
+  place-items:center;
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  background:var(--grad);
+  box-shadow:0 8px 24px rgba(255,122,89,.26);
+}
+.brand-mark svg{width:23px;height:23px;stroke:var(--on-accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.brand-copy{display:flex;flex-direction:column;line-height:1.2}
+.brand-copy strong{font-size:16px;font-weight:800;letter-spacing:-.3px}
+.brand-copy small{margin-top:3px;color:var(--faint);font-size:9px;letter-spacing:.12em;text-transform:uppercase}
+.main-nav{display:flex;align-items:center;gap:4px;margin-inline-start:22px}
+.nav-link{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:36px;
+  padding:5px 13px;
+  border:1px solid transparent;
+  border-radius:99px;
+  color:var(--muted);
+  background:transparent;
+  font-size:12px;
+  transition:color .18s,background .18s,border-color .18s;
+}
+.nav-link svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-link:hover{color:var(--text);background:rgba(26,31,46,.78)}
+.nav-link.active{color:var(--text);border-color:rgba(255,122,89,.24);background:rgba(255,122,89,.1);font-weight:700}
+.header-spacer{flex:1}
+.shortcut{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  min-height:32px;
+  border:1px solid rgba(255,180,84,.22);
+  border-radius:99px;
+  color:var(--accent-2);
+  background:rgba(255,180,84,.06);
+  font-size:10.5px;
+  white-space:nowrap;
+}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 0 4px rgba(255,180,84,.1)}
+.shortcut{padding:4px 10px;border-color:var(--border);color:var(--faint);background:rgba(26,31,46,.7);font-size:10px}
+.shortcut kbd{font-family:inherit;color:var(--muted)}
+.page{width:min(100%,1280px);margin:0 auto;padding:38px 24px 150px}
+.hero{margin:4px 0 38px;text-align:center}
+.hero h1{margin-top:11px;font-size:clamp(28px,3.4vw,36px);font-weight:800;line-height:1.3;letter-spacing:-1.2px}
+.hero h1 span{display:inline-block;animation:title-in .65s cubic-bezier(.22,.8,.25,1) both}
+.hero h1 span:nth-child(2){animation-delay:.08s}
+.hero h1 span:nth-child(3){animation-delay:.16s}
+.hero h1 .title-highlight{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes title-in{from{opacity:0;filter:blur(5px);transform:translateY(-8px) scale(.96)}to{opacity:1;filter:blur(0);transform:none}}
+.studio-card{
+  display:flex;
+  min-height:430px;
+  overflow:visible;
+  border:1px solid rgba(255,122,89,.14);
+  border-radius:var(--radius);
+  background:var(--surface-glass);
+  box-shadow:0 0 36px rgba(0,0,0,.18),0 20px 70px rgba(0,0,0,.2);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
+.editor-pane{display:flex;flex:1;min-width:0;flex-direction:column;padding:30px 32px 26px}
+.settings-pane{width:380px;flex-shrink:0;padding:30px 32px;border-inline-start:1px solid var(--border-soft)}
+.card-heading{display:flex;align-items:flex-start;gap:12px;min-height:54px}
+.step-index{
+  display:grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  flex-shrink:0;
+  border:1px solid rgba(255,180,84,.3);
+  border-radius:9px;
+  color:var(--accent-2);
+  background:rgba(255,180,84,.08);
+  font-size:10px;
+  font-weight:800;
+}
+.card-heading h2{font-size:23px;font-weight:750;line-height:1.45;letter-spacing:-.5px}
+.card-heading p{margin-top:2px;color:var(--muted);font-size:11.5px;line-height:1.6}
+.heading-tag{margin-inline-start:auto;padding:4px 9px;border:1px solid var(--border);border-radius:99px;color:var(--faint);font-size:9px;letter-spacing:.04em;white-space:nowrap}
+.editor-field{display:flex;flex:1;min-height:220px;flex-direction:column;margin-top:20px;border-bottom:1px solid var(--border-soft)}
+#txt{
+  display:block;
+  width:100%;
+  min-height:218px;
+  flex:1;
+  padding:8px 0 12px;
+  border:0;
+  outline:0;
+  resize:vertical;
+  color:var(--text);
+  background:transparent;
+  font-size:17px;
+  line-height:2.1;
+}
+#txt::placeholder{color:var(--faint)}
+.field-note{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 0 10px;color:var(--faint);font-size:10.5px}
+.field-note .counter{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sample-row{display:flex;align-items:flex-start;gap:10px;margin-top:15px}
+.composer-toolbar{display:flex;align-items:center;gap:14px;margin-top:15px}
+.composer-toolbar .sample-row{min-width:0;flex:1;margin-top:0}
+.composer-toolbar .chips{min-width:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.composer-toolbar .chips::-webkit-scrollbar{display:none}
+.composer-toolbar .editor-actions{flex-shrink:0;margin-top:0}
+.sample-label{padding-top:5px;color:var(--faint);font-size:11px;white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  max-width:220px;
+  overflow:hidden;
+  padding:4px 10px;
+  border:1px solid var(--border);
+  border-radius:99px;
+  color:var(--muted);
+  background:transparent;
+  font-size:10.5px;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  transition:color .18s,border-color .18s,background .18s;
+}
+.chip:hover{color:var(--text);border-color:var(--accent);background:rgba(255,122,89,.06)}
+.editor-actions{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:23px}
+.pchips{display:flex;flex-wrap:wrap;gap:5px}
+.pchip{
+  padding:5px 10px;
+  border:1px solid var(--border);
+  border-radius:99px;
+  color:var(--muted);
+  background:transparent;
+  font-size:10.5px;
+  transition:color .18s,border-color .18s,background .18s,box-shadow .18s;
+}
+.pchip:hover{color:var(--text);border-color:var(--border-strong)}
+.pchip.sel{border-color:transparent;color:var(--on-accent);background:var(--grad);box-shadow:0 4px 12px rgba(255,122,89,.2);font-weight:750}
+.primary-action,.secondary-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  border-radius:99px;
+  font-weight:800;
+  transition:transform .16s,box-shadow .16s,opacity .16s,filter .16s;
+}
+.primary-action{
+  min-width:156px;
+  padding:10px 19px;
+  color:var(--on-accent);
+  background:var(--grad);
+  box-shadow:0 8px 24px rgba(255,122,89,.25);
+  font-size:12.5px;
+}
+.primary-action:hover:not(:disabled),.secondary-action:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.04)}
+.primary-action:active:not(:disabled),.secondary-action:active:not(:disabled){transform:translateY(0)}
+.primary-action:disabled{opacity:.7;box-shadow:none}
+.primary-action svg,.secondary-action svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.primary-action .spinner{display:none;width:15px;height:15px;border:2px solid rgba(35,19,3,.25);border-top-color:var(--on-accent);border-radius:50%;animation:spin .8s linear infinite}
+.primary-action.busy .spinner{display:block}
+.primary-action.busy .action-icon{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ph-tools{margin-top:17px}
+.disclosure{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  padding:9px 11px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  color:var(--muted);
+  background:rgba(26,31,46,.64);
+  font-size:11px;
+  text-align:start;
+  transition:color .18s,border-color .18s,background .18s;
+}
+.disclosure:hover{color:var(--text);border-color:var(--accent);background:rgba(255,122,89,.05)}
+.disclosure .plus{color:var(--accent-2);font-size:17px;font-weight:300;line-height:1}
+.disclosure.open .plus{transform:rotate(45deg)}
+body.modal-open{overflow:hidden}
+.phoneme-editor{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px;background:rgba(12,14,19,.74);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.phoneme-editor[hidden]{display:none}
+.phoneme-editor.open{animation:rise .25s ease}
+.phoneme-modal{width:min(100%,560px);max-height:calc(100dvh - 40px);overflow:auto;padding:22px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:0 24px 80px rgba(0,0,0,.48)}
+.modal-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:18px}
+.modal-kicker{color:var(--accent-2);font-size:9px;letter-spacing:.08em}
+.modal-header h2{margin-top:3px;font-size:21px;font-weight:800}
+.modal-close{display:grid;place-items:center;width:32px;height:32px;flex-shrink:0;border:1px solid var(--border);border-radius:10px;color:var(--muted);background:var(--surface-2);font-size:22px;line-height:1;transition:color .18s,border-color .18s,background .18s}
+.modal-close:hover{color:var(--text);border-color:var(--border-strong);background:rgba(255,122,89,.08)}
+.phoneme-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;color:var(--muted);font-size:11px;font-weight:700}
+.phoneme-label small{color:var(--faint);font-size:9px;font-weight:400}
+#phInput{width:100%;min-height:150px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;outline:0;resize:vertical;color:var(--text);background:var(--surface-2);font-family:"Cascadia Code",Consolas,monospace;font-size:12px;line-height:1.8;text-align:left;direction:ltr}
+#phInput:focus{border-color:var(--border-strong)}
+#phInput::placeholder{color:var(--faint)}
+.ph-hint{margin-top:8px;color:var(--faint);font-size:10px;line-height:1.7}
+.ph-hint b{color:var(--accent-2);font-weight:600}
+.phoneme-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.phoneme-footer small{color:var(--faint);font-size:9.5px}
+.secondary-action{padding:9px 14px;border:1px solid var(--border-strong);color:var(--text);background:rgba(255,122,89,.08);font-size:10.5px}
+.secondary-action:disabled{opacity:.65}
+.voice-select-wrap{position:relative;margin-top:22px}
+.voice-select{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  width:100%;
+  min-height:68px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  color:var(--text);
+  background:var(--surface-2);
+  text-align:start;
+  transition:border-color .18s,background .18s;
+}
+.voice-select:hover,.voice-select[aria-expanded=true]{border-color:var(--border-strong);background:rgba(26,31,46,.98)}
+.voice-avatar,.vcard-icon{
+  display:grid;
+  place-items:center;
+  width:44px;
+  height:44px;
+  flex-shrink:0;
+  border:1px solid rgba(255,180,84,.25);
+  border-radius:50%;
+  color:var(--accent-2);
+  background:radial-gradient(circle at 30% 25%,rgba(255,180,84,.28),transparent 52%),var(--surface);
+}
+.voice-avatar svg,.vcard-icon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.voice-copy{display:flex;min-width:0;flex:1;flex-direction:column;line-height:1.45}
+.voice-copy .eyebrow-small{color:var(--faint);font-size:9px}
+.voice-copy strong{overflow:hidden;margin-top:2px;font-size:12.5px;font-weight:750;text-overflow:ellipsis;white-space:nowrap}
+.voice-copy small{overflow:hidden;margin-top:2px;color:var(--muted);font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+.select-chevron{width:18px;height:18px;color:var(--faint);transition:transform .18s}
+.voice-select[aria-expanded=true] .select-chevron{transform:rotate(180deg)}
+.voice-menu{position:absolute;inset-inline:0;top:calc(100% + 8px);z-index:20;max-height:310px;overflow:auto;padding:5px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:0 16px 38px rgba(0,0,0,.4)}
+.voice-menu[hidden]{display:none}
+.voice-menu-title{padding:7px 9px 8px;color:var(--faint);font-size:10px}
+.vcard{display:flex;align-items:center;gap:10px;width:100%;margin-bottom:4px;padding:9px;border:1px solid transparent;border-radius:11px;color:var(--text);background:transparent;text-align:start;transition:border-color .18s,background .18s}
+.vcard:last-child{margin-bottom:0}
+.vcard:hover{border-color:var(--border);background:var(--surface-2)}
+.vcard.sel{border-color:rgba(255,122,89,.34);background:rgba(255,122,89,.08)}
+.vcard .vcard-icon{width:38px;height:38px}
+.vcard-copy{display:flex;min-width:0;flex:1;flex-direction:column;line-height:1.4}
+.vcard-copy strong{overflow:hidden;font-size:11.5px;text-overflow:ellipsis;white-space:nowrap}
+.vcard-copy small{overflow:hidden;margin-top:2px;color:var(--muted);font-size:9.5px;text-overflow:ellipsis;white-space:nowrap}
+.voice-tag{padding:3px 6px;border:1px solid rgba(255,180,84,.2);border-radius:99px;color:var(--accent-2);font-size:8px;white-space:nowrap}
+.upload-zone{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-top:12px;
+  padding:11px 12px;
+  border:1px dashed var(--border);
+  border-radius:12px;
+  color:var(--muted);
+  background:rgba(26,31,46,.4);
+  font-size:10.5px;
+  text-align:start;
+  transition:border-color .18s,color .18s,background .18s;
+}
+.upload-zone:hover,.upload-zone.over{border-color:var(--accent);color:var(--text);background:rgba(255,122,89,.06)}
+.upload-icon{display:grid;place-items:center;width:30px;height:30px;flex-shrink:0;border-radius:9px;color:var(--accent-2);background:rgba(255,180,84,.1)}
+.upload-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.upload-zone strong{color:var(--text);font-size:10.5px}
+.upload-zone small{display:block;margin-top:1px;color:var(--faint);font-size:9px}
+.settings-section{margin-top:24px;padding-top:20px;border-top:1px solid var(--border-soft)}
+.setting-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.setting-head strong{font-size:11.5px;font-weight:750}
+.setting-head output{color:var(--accent-2);font-size:11px;font-variant-numeric:tabular-nums}
+.setting-help{margin-top:2px;color:var(--faint);font-size:9.5px}
+.range-line{display:flex;align-items:center;gap:10px;margin-top:13px}
+input[type=range]{
+  width:100%;
+  height:4px;
+  flex:1;
+  appearance:none;
+  -webkit-appearance:none;
+  border-radius:99px;
+  outline:0;
+  background:linear-gradient(90deg,var(--accent) 0 var(--range-progress,35%),var(--border) var(--range-progress,35%) 100%);
+  direction:ltr;
+}
+input[type=range]::-webkit-slider-thumb{width:16px;height:16px;appearance:none;-webkit-appearance:none;border:3px solid var(--accent);border-radius:50%;background:var(--surface);box-shadow:0 2px 8px rgba(255,122,89,.35);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border:3px solid var(--accent);border-radius:50%;background:var(--surface);box-shadow:0 2px 8px rgba(255,122,89,.35);cursor:pointer}
+.range-ends{display:flex;justify-content:space-between;margin-top:6px;color:var(--faint);font-size:9px}
+.mode-settings .mode-switch-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--surface-2);font-size:10px}
+.mode-switch-row>span{color:var(--muted);font-weight:650}
+.switch{position:relative;display:inline-flex;width:42px;height:24px;flex-shrink:0;direction:ltr;cursor:pointer}
+.switch input{position:absolute;inset:0;width:100%;height:100%;margin:0;cursor:pointer;opacity:0}
+.switch-track{position:relative;display:block;width:42px;height:24px;border:1px solid var(--border);border-radius:99px;background:var(--border);transition:background .18s,border-color .18s}
+.switch-track span{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--muted);box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .18s,background .18s}
+.switch input:checked + .switch-track{border-color:transparent;background:var(--grad)}
+.switch input:checked + .switch-track span{background:var(--on-accent);transform:translateX(18px)}
+.switch input:focus-visible + .switch-track{outline:2px solid var(--accent);outline-offset:3px}
+.engine-note{display:flex;align-items:center;gap:8px;margin-top:22px;padding:10px 11px;border:1px solid rgba(255,180,84,.14);border-radius:10px;color:var(--faint);background:rgba(255,180,84,.04);font-size:9.5px;line-height:1.6}
+.engine-note svg{width:15px;height:15px;flex-shrink:0;fill:none;stroke:var(--accent-2);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.post-card-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:14px;padding:0 5px}
+.quick-tip{display:flex;align-items:center;gap:8px;color:var(--faint);font-size:10.5px}
+.quick-tip svg{width:15px;height:15px;fill:none;stroke:var(--accent-2);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.shortcut-note{color:var(--faint);font-size:10px}
+.shortcut-note kbd{padding:2px 5px;border:1px solid var(--border);border-radius:5px;color:var(--muted);background:var(--surface-2);font-family:inherit}
 
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.chip{font-size:12.5px;color:var(--muted);background:transparent;
-  border:1px solid var(--border);border-radius:99px;padding:5px 13px;cursor:pointer;
-  transition:all .18s}
-.chip:hover{color:var(--text);border-color:var(--accent)}
-
-/* ---------- voices ---------- */
-.vcard{display:flex;align-items:center;gap:12px;width:100%;text-align:right;
-  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-s);
-  padding:11px 13px;margin-bottom:9px;cursor:pointer;transition:all .18s;font:inherit;color:var(--text)}
-.vcard:hover{border-color:#39415c}
-.vcard.sel{border-color:var(--accent);background:rgba(255,122,89,.07)}
-.vcard .ic{width:38px;height:38px;border-radius:50%;flex-shrink:0;
-  display:grid;place-items:center;background:var(--surface);border:1px solid var(--border)}
-.vcard.sel .ic{background:var(--grad);border:none;color:var(--on-accent)}
-.vcard .ic svg{width:17px;height:17px}
-.vcard .nm{font-size:13.5px;font-weight:700}
-.vcard .ds{font-size:11.5px;color:var(--muted);margin-top:-3px}
-
-.drop{margin-top:6px;border:1.5px dashed var(--border);border-radius:var(--radius-s);
-  padding:15px;text-align:center;font-size:12.5px;color:var(--muted);cursor:pointer;transition:all .2s}
-.drop:hover,.drop.over{border-color:var(--accent);color:var(--text);background:rgba(255,122,89,.04)}
-.drop b{color:var(--accent-2);font-weight:600}
-
-/* ---------- pace ---------- */
-.pace-row{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
-.plabel{font-size:13px;font-weight:700;color:var(--muted)}
-.pchips{display:flex;gap:6px}
-.pchip{font-size:11.5px;color:var(--muted);background:transparent;border:1px solid var(--border);
-  border-radius:99px;padding:4px 11px;cursor:pointer;transition:all .18s;font-family:inherit}
-.pchip:hover{color:var(--text)}
-.pchip.sel{color:var(--on-accent);background:var(--grad);border-color:transparent;font-weight:700}
-input[type=range]{flex:1;min-width:120px;appearance:none;-webkit-appearance:none;height:5px;
-  border-radius:99px;background:var(--surface-2);outline:none;direction:ltr}
-input[type=range]::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:17px;height:17px;
-  border-radius:50%;background:var(--grad);cursor:pointer;border:2.5px solid var(--bg);
-  box-shadow:0 2px 10px rgba(255,122,89,.5)}
-input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);
-  cursor:pointer;border:2.5px solid var(--bg)}
-.pval{font-size:12.5px;color:var(--accent-2);font-variant-numeric:tabular-nums;min-width:44px;text-align:center}
-
-/* ---------- generate ---------- */
-.go{width:100%;margin-top:16px;border:none;border-radius:var(--radius-s);cursor:pointer;
-  background:var(--grad);color:var(--on-accent);font:inherit;font-size:15.5px;font-weight:800;
-  padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;
-  box-shadow:0 8px 24px rgba(255,122,89,.3);transition:transform .15s,box-shadow .15s}
-.go:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 12px 30px rgba(255,122,89,.4)}
-.go:disabled{opacity:.75;cursor:wait}
-.go svg{width:19px;height:19px}
-
-.ph-tools{margin-top:10px}
-.ph-prep{width:100%;border:1px solid var(--border);border-radius:var(--radius-s);
-  background:var(--surface-2);color:var(--muted);font:inherit;font-size:13px;font-weight:700;
-  padding:10px 12px;cursor:pointer;transition:all .18s}
-.ph-prep:hover:not(:disabled){color:var(--text);border-color:var(--accent)}
-.ph-prep:disabled{opacity:.65;cursor:wait}
-.ph-editor{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-.ph-editor.show{display:block}
-#phInput{min-height:105px;direction:ltr;text-align:left;font-family:"Cascadia Code",Consolas,monospace;
-  font-size:12.5px;line-height:1.7}
-.ph-hint{font-size:11.5px;color:var(--faint);margin-top:7px;line-height:1.7}
-
-.eq{display:none;gap:3px;align-items:flex-end;height:18px}
-.eq i{width:3.5px;background:var(--on-accent);border-radius:2px;animation:eq 1s ease-in-out infinite}
-.eq i:nth-child(1){height:8px;animation-delay:0s}.eq i:nth-child(2){height:16px;animation-delay:.15s}
-.eq i:nth-child(3){height:11px;animation-delay:.3s}.eq i:nth-child(4){height:15px;animation-delay:.45s}
-@keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
-.busy .eq{display:flex}.busy .tx{display:none}
-
-/* ---------- result ---------- */
-.result{margin-top:18px;display:none;animation:rise .4s ease}
-.result.show{display:block}
-@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-
-.ph{direction:ltr;text-align:left;font-family:"Cascadia Code",Consolas,monospace;
-  font-size:12.5px;color:var(--accent-2);background:rgba(255,180,84,.05);
-  border:1px solid rgba(255,180,84,.15);border-radius:var(--radius-s);
-  padding:9px 14px;margin-bottom:14px;word-break:break-all;line-height:1.7}
-.ph span{color:var(--faint)}
-
-.player{display:flex;align-items:center;gap:14px}
-.play{width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;flex-shrink:0;
-  background:var(--grad);display:grid;place-items:center;
-  box-shadow:0 6px 18px rgba(255,122,89,.35);transition:transform .15s}
-.play:hover{transform:scale(1.06)}
-.play svg{width:20px;height:20px;fill:var(--on-accent)}
-.wave{flex:1;height:74px;position:relative;cursor:pointer}
-canvas{width:100%;height:100%;border-radius:8px}
-.tm{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:86px;text-align:center}
-.dl{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-s);
-  width:42px;height:42px;display:grid;place-items:center;cursor:pointer;color:var(--muted);transition:all .18s}
-.dl:hover{color:var(--text);border-color:var(--accent)}
-.dl svg{width:18px;height:18px}
-
-/* ---------- history ---------- */
-.hist{margin-top:26px}
-.hist h2{font-size:14px;font-weight:700;color:var(--muted);margin-bottom:12px}
-.hrow{display:flex;align-items:center;gap:12px;background:var(--surface);
-  border:1px solid var(--border);border-radius:var(--radius-s);padding:10px 14px;
-  margin-bottom:8px;cursor:pointer;transition:border-color .18s}
-.hrow:hover{border-color:#39415c}
-.hrow .hplay{width:34px;height:34px;border-radius:50%;flex-shrink:0;
-  background:var(--surface-2);border:1px solid var(--border);display:grid;place-items:center}
-.hrow .hplay svg{width:13px;height:13px}
-.hrow .htx{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hrow .hd{font-size:11.5px;color:var(--faint);white-space:nowrap}
-
-footer{margin-top:46px;text-align:center;font-size:11.5px;color:var(--faint)}
+footer{padding:0 24px 26px;color:var(--faint);font-size:10px;text-align:center}
 footer b{color:var(--muted);font-weight:600}
-
-.toast{position:fixed;bottom:24px;right:50%;transform:translateX(50%);
-  background:var(--surface-2);border:1px solid var(--border);border-radius:99px;
-  padding:10px 20px;font-size:13px;box-shadow:var(--shadow);display:none;z-index:9}
-.toast.show{display:block;animation:rise .3s ease}
+.transport{position:fixed;inset-inline:0;bottom:0;z-index:40;visibility:hidden;border-top:1px solid rgba(255,122,89,.2);background:rgba(20,24,36,.96);box-shadow:0 -14px 40px rgba(0,0,0,.32);transform:translateY(110%);transition:transform .3s ease,visibility .3s}
+.transport.show{visibility:visible;transform:translateY(0)}
+.transport-inner{display:grid;grid-template-columns:minmax(190px,1fr) minmax(300px,500px) minmax(190px,1fr);align-items:center;gap:24px;width:min(100%,1280px);min-height:90px;margin:0 auto;padding:12px 24px}
+.transport-info{display:flex;align-items:center;gap:10px;min-width:0}
+.transport-avatar{display:grid;place-items:center;width:38px;height:38px;flex-shrink:0;border-radius:12px;color:var(--on-accent);background:var(--grad)}
+.transport-avatar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.transport-copy{min-width:0}
+.transport-copy strong{display:block;overflow:hidden;font-size:11.5px;text-overflow:ellipsis;white-space:nowrap}
+.transport-copy small{display:block;overflow:hidden;margin-top:2px;color:var(--muted);font-size:9.5px;text-overflow:ellipsis;white-space:nowrap}
+.transport-main{display:flex;align-items:center;gap:12px;min-width:0}
+.play{display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;border-radius:50%;color:var(--on-accent);background:var(--grad);box-shadow:0 5px 16px rgba(255,122,89,.3);transition:transform .16s}
+.play:hover{transform:scale(1.06)}
+.play svg{width:15px;height:15px;fill:currentColor}
+.timeline{position:relative;height:25px;min-width:80px;flex:1;cursor:pointer}
+.timeline canvas{width:100%;height:100%;border-radius:99px;background:rgba(37,43,61,.72)}
+.time-display{min-width:72px;color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums;text-align:center;white-space:nowrap}
+.transport-actions{display:flex;justify-content:flex-end}
+.download-button{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border:1px solid var(--border);border-radius:99px;color:var(--muted);background:var(--surface-2);font-size:10px;transition:color .18s,border-color .18s,background .18s}
+.download-button:hover{color:var(--text);border-color:var(--border-strong);background:rgba(255,122,89,.08)}
+.download-button svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;right:50%;bottom:112px;z-index:80;display:none;max-width:calc(100vw - 32px);padding:9px 17px;border:1px solid var(--border);border-radius:99px;color:var(--text);background:var(--surface-2);box-shadow:var(--shadow);font-size:11px;transform:translateX(50%);white-space:nowrap}
+.toast.show{display:block;animation:rise .25s ease}
+.toast.error{border-color:rgba(255,122,89,.45);color:var(--accent-2)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:1050px){
+  .main-nav{margin-inline-start:8px}
+  .shortcut{display:none}
+  .settings-pane{width:340px;padding-inline:24px}
+  .editor-pane{padding-inline:25px}
+  .transport-inner{grid-template-columns:minmax(160px,1fr) minmax(260px,440px) minmax(150px,1fr);gap:14px}
+}
+@media(min-width:821px) and (min-height:680px){
+  .page{height:calc(100dvh - 100px);min-height:0;display:flex;flex-direction:column;justify-content:center;padding:14px 24px 10px}
+  .hero{margin:0 0 14px}
+  .hero h1{margin:0;font-size:32px;line-height:1.2;letter-spacing:-.8px;white-space:nowrap}
+  .studio-card{height:clamp(380px,calc(100dvh - 340px),560px);min-height:0}
+  .editor-pane,.settings-pane{min-height:0;padding:18px 24px}
+  .card-heading{min-height:44px;gap:9px}
+  .card-heading h2{font-size:19px;line-height:1.35}
+  .card-heading p{font-size:10px;line-height:1.45}
+  .step-index{width:25px;height:25px;border-radius:8px;font-size:9px}
+  .heading-tag{padding:3px 7px;font-size:8px}
+  .editor-field{min-height:0;margin-top:10px}
+  #txt{min-height:128px;padding-top:4px;font-size:15px;line-height:1.85}
+  .field-note{padding-bottom:6px;font-size:9.5px}
+  .sample-row{margin-top:8px}
+  .sample-label{padding-top:4px;font-size:10px}
+  .chip{padding:3px 8px;font-size:9.5px}
+  .editor-actions{margin-top:12px}
+  .composer-toolbar{margin-top:8px}
+  .composer-toolbar .sample-row,.composer-toolbar .editor-actions{margin-top:0}
+  .primary-action{min-width:145px;padding:8px 18px;font-size:12px}
+  .ph-tools{margin-top:8px}
+  .disclosure{padding:7px 10px;font-size:10px}
+  .settings-pane{width:420px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;column-gap:12px}
+  .settings-pane>.card-heading,.settings-pane>.voice-select-wrap,.settings-pane>.upload-zone,.settings-pane>.mode-settings,.settings-pane>.engine-note{grid-column:1/-1}
+  .voice-select-wrap{margin-top:10px}
+  .voice-select{min-height:56px;padding:7px 10px;gap:9px}
+  .voice-avatar{width:38px;height:38px}
+  .voice-avatar svg{width:18px;height:18px}
+  .voice-copy strong{font-size:11.5px}
+  .voice-copy small{font-size:9px}
+  .upload-zone{margin-top:8px;padding:8px 10px}
+  .upload-icon{width:26px;height:26px;border-radius:8px}
+  .upload-zone strong{font-size:9.5px}
+  .upload-zone small{font-size:8.5px}
+  .settings-section{margin-top:10px;padding-top:10px}
+  .setting-head strong{font-size:10.5px}
+  .setting-head output{font-size:10px}
+  .setting-help{font-size:8.5px}
+  .range-line{margin-top:8px}
+  .range-ends{margin-top:3px;font-size:8px}
+  .mode-settings .mode-switch-row{margin-top:7px;padding:6px 8px;font-size:9px}
+  .switch{width:38px;height:22px}
+  .switch-track{width:38px;height:22px}
+  .switch-track span{top:3px;width:14px;height:14px}
+  .switch input:checked + .switch-track span{transform:translateX(16px)}
+  .engine-note{margin-top:10px;padding:7px 9px;font-size:8.5px}
+  .post-card-row{margin-top:8px}
+  .quick-tip{font-size:9px}
+  .shortcut-note{font-size:9px}
+  footer{padding-bottom:8px;font-size:9px}
+  .transport-inner{min-height:78px;padding:8px 24px}
+}
+@media(min-width:821px) and (max-height:880px){
+  .range-ends{display:none}
+  .mode-settings .setting-help{display:none}
+  .engine-note{display:none}
+}
+@media(max-width:820px){
+  .header-inner{flex-wrap:wrap;padding:10px 16px}
+  .header-spacer{display:none}
+  .main-nav{order:3;width:100%;margin:0;padding-top:2px;overflow-x:auto}
+  .nav-link{flex:1;justify-content:center;padding-inline:8px}
+  .page{padding:30px 16px 155px}
+  .studio-card{flex-direction:column}
+  .settings-pane{width:100%;border-inline-start:0;border-top:1px solid var(--border-soft)}
+  .editor-pane{min-height:410px}
+  .settings-pane{display:grid;grid-template-columns:1fr 1fr;column-gap:18px}
+  .settings-pane>.card-heading,.settings-pane>.voice-select-wrap,.settings-pane>.upload-zone{grid-column:1/-1}
+  .settings-pane>.settings-section{margin-top:18px}
+  .settings-pane>.engine-note{grid-column:1/-1}
+  .post-card-row{align-items:flex-start;flex-direction:column;gap:7px}
+  .transport-inner{grid-template-columns:1fr auto;gap:10px;min-height:82px;padding:10px 16px}
+  .transport-info{grid-column:1;grid-row:1}
+  .transport-main{grid-column:1/-1;grid-row:2}
+  .transport-actions{grid-column:2;grid-row:1}
+  .toast{bottom:115px}
+}
+@media(max-width:560px){
+  .brand-copy small{display:none}
+  .hero{margin-bottom:28px}
+  .hero h1{font-size:29px;letter-spacing:-.8px}
+  .hero p{font-size:11px}
+  .card-heading h2{font-size:20px}
+  .heading-tag{display:none}
+  .editor-pane,.settings-pane{padding:22px 18px}
+  .editor-pane{min-height:450px}
+  #txt{min-height:225px;font-size:15px}
+  .editor-actions{align-items:stretch;flex-direction:column}
+  .composer-toolbar{align-items:stretch;flex-direction:column}
+  .composer-toolbar .chips{flex-wrap:wrap;overflow:visible}
+  .primary-action{width:100%}
+  .phoneme-editor{padding:12px}
+  .phoneme-modal{padding:18px}
+  .phoneme-footer{align-items:stretch;flex-direction:column}
+  .secondary-action{width:100%;justify-content:center}
+  .settings-pane{display:flex;flex-direction:column}
+  .settings-pane>.settings-section{margin-top:20px}
+  .transport-info .transport-avatar{display:none}
+  .transport-copy strong{font-size:10.5px}
+  .transport-inner{padding-inline:12px}
+  .time-display{min-width:64px;font-size:9px}
+  .download-button span{display:none}
+  .download-button{padding:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
 </style>
 </head>
 <body>
-<div class="orb a"></div><div class="orb b"></div>
-<div class="wrap">
-
-  <header>
-    <div class="logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round">
-        <path d="M3 13.5h2l2-6 3 12 3-16 3 16 2-6h3"/>
-      </svg>
-    </div>
-    <div>
-      <h1>پارسی‌گو</h1>
-      <div class="sub">تبدیل متن فارسی به گفتار، با کلونینگ صدای مرجع</div>
-    </div>
-    <div class="badge">موتور ONNX · آفلاین · بدون torch</div>
-  </header>
-
-  <div class="grid">
-    <section class="panel">
-      <div class="label"><span>متن فارسی</span><span class="cnt" id="cnt"></span></div>
-      <textarea id="txt" placeholder="متن خود را بنویسید…">سلام، حال شما چطور است؟ امیدوارم روز خوبی داشته باشید.</textarea>
-      <div class="chips" id="chips"></div>
-      <div class="pace-row">
-        <span class="plabel">حالت گفتار</span>
-        <div class="pchips">
-          <button class="pchip sel" data-m="split" title="هر ویرگول و علامت، مکث خودش را می‌گیرد">با مکث ویرگول‌ها</button>
-          <button class="pchip" data-m="pack" title="جمله در نفس‌های بلندتر خوانده می‌شود؛ فقط دونقطه و خط تیره مکث دارند">یکپارچه و روان</button>
-        </div>
-      </div>
-      <div class="pace-row">
-        <span class="plabel">سرعت گفتار</span>
-        <div class="pchips">
-          <button class="pchip" data-p="0.85">آرام</button>
-          <button class="pchip sel" data-p="1">معمولی</button>
-          <button class="pchip" data-p="1.2">سریع</button>
-        </div>
-        <input type="range" id="pace" min="0.7" max="1.35" step="0.05" value="1" dir="ltr">
-        <span class="pval" id="paceVal">۱٫۰۰×</span>
-      </div>
-      <button class="go" id="go">
-        <span class="tx" style="display:flex;align-items:center;gap:10px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/>
-          </svg>
-          ساخت گفتار
-        </span>
-        <span class="eq"><i></i><i></i><i></i><i></i></span>
+<header class="topbar">
+  <div class="header-inner">
+    <a class="brand" href="#studio" aria-label="پارسی‌گو، استودیوی گفتار">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 13.5h2l2-6 3 12 3-16 3 16 2-6h3"/>
+        </svg>
+      </span>
+      <span class="brand-copy"><strong>پارسی‌گو</strong><small>audio studio</small></span>
+    </a>
+    <nav class="main-nav" aria-label="ناوبری اصلی">
+      <button class="nav-link active" type="button" data-scroll="studio">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg>
+        <span>استودیو</span>
       </button>
 
-      <div class="ph-tools">
-        <button class="ph-prep" id="phPrep">اصلاح تلفظ / ویرایش فونم</button>
-        <div class="ph-editor" id="phEditor">
-          <div class="label"><span>فونم قابل ویرایش</span><span class="cnt">لاتین</span></div>
-          <textarea id="phInput" dir="ltr" spellcheck="false" placeholder="فونم تولیدشده اینجا نمایش داده می‌شود…"></textarea>
-          <div class="ph-hint">اگر تلفظ واژه‌ای اشتباه است، فقط همان بخش را اصلاح کنید؛ مثلاً <b>tost</b> را به <b>test</b> تغییر دهید.</div>
-          <button class="go" id="phGo">ساخت گفتار از فونم اصلاح‌شده</button>
+      <a class="nav-link" href="/history">
+        <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6M8 17h4"/></svg>
+        <span>تاریخچه</span>
+      </a>
+    </nav>
+    <span class="header-spacer"></span>
+    <div class="shortcut" title="ساخت گفتار با Ctrl یا Cmd و Enter"><kbd>⌘</kbd><span>Enter</span></div>
+  </div>
+</header>
+
+<main class="page">
+  <section class="hero" aria-labelledby="pageTitle">
+    <h1 id="pageTitle" aria-label="صدایی که کلمات را زنده می‌کند"><span>صدایی که</span> <span class="title-highlight">کلمات را زنده</span> <span>می‌کند</span></h1>
+  </section>
+
+  <section class="studio-card" id="studio" aria-label="استودیوی ساخت گفتار">
+    <div class="editor-pane">
+      <div class="card-heading">
+        <span class="step-index">۰۱</span>
+        <div><h2>متن به گفتار</h2><p>متن فارسی را اینجا بنویسید تا صدای شما شکل بگیرد.</p></div>
+        <span class="heading-tag">ONNX RUNTIME</span>
+      </div>
+      <div class="editor-field">
+        <textarea id="txt" maxlength="800" placeholder="متن خود را اینجا بنویسید…">سلام، حال شما چطور است؟ امیدوارم روز خوبی داشته باشید.</textarea>
+        <div class="field-note"><span>هرچه جزئیات بیشتر باشد، اجرای گفتار دقیق‌تر است.</span><span class="counter" id="cnt"></span></div>
+      </div>
+      <div class="composer-toolbar">
+        <div class="sample-row">
+          <span class="sample-label">نمونه‌ها</span>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="editor-actions">
+          <button class="primary-action" id="go" type="button">
+            <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg>
+            <span class="spinner" aria-hidden="true"></span>
+            <span id="goLabel">ساخت گفتار</span>
+          </button>
         </div>
       </div>
-    </section>
+      <div class="ph-tools">
+        <button class="disclosure" id="phPrep" type="button" aria-expanded="false" aria-controls="phEditor">
+          <span>اصلاح تلفظ / ویرایش فونم</span><span class="plus">+</span>
+        </button>
 
-    <aside class="panel">
-      <div class="label"><span>صدای مرجع</span><span class="cnt">≤ ۵ ثانیه</span></div>
-      <div id="voices"></div>
-      <div class="drop" id="drop">
-        <b>بارگذاری صدا</b> — یا فایل را اینجا رها کنید<br>
-        <span style="font-size:11px;color:var(--faint)">صدای خودت را بده تا با آن حرف بزند (WAV)</span>
       </div>
-      <input type="file" id="file" accept=".wav,.mp3,.ogg,.flac" hidden>
+    </div>
+
+    <aside class="settings-pane" id="voiceSettings">
+      <div class="card-heading">
+        <span class="step-index">۰۲</span>
+        <div><h2>تنظیمات صدا</h2><p>صدای مرجع و سرعت خواندن را انتخاب کنید.</p></div>
+      </div>
+      <div class="voice-select-wrap">
+        <button class="voice-select" id="voiceSelect" type="button" aria-expanded="false" aria-controls="voiceMenu">
+          <span class="voice-avatar" id="selectedAvatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2l2-6 3 12 3-16 3 16 2-6h3"/></svg></span>
+          <span class="voice-copy"><span class="eyebrow-small">صدای انتخاب‌شده</span><strong id="selectedVoiceName">در حال بارگذاری صداها…</strong><small id="selectedVoiceDesc">لطفاً کمی صبر کنید</small></span>
+          <svg class="select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="voice-menu" id="voiceMenu" hidden>
+          <div class="voice-menu-title">انتخاب از کتابخانه</div>
+          <div id="voices"></div>
+        </div>
+      </div>
+      <div class="upload-zone" id="drop" role="button" tabindex="0" aria-label="بارگذاری صدای مرجع">
+        <span class="upload-icon"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L8 8m4-4 4 4"/><path d="M5 14v5h14v-5"/></svg></span>
+        <span><strong>بارگذاری صدای شما</strong><small>فایل را اینجا رها کنید · WAV / MP3 / OGG / FLAC</small></span>
+      </div>
+      <input id="file" type="file" accept=".wav,.mp3,.ogg,.flac" hidden>
+      <div class="settings-section">
+        <div class="setting-head"><strong>سرعت گفتار</strong><output id="paceVal">۱٫۰۰×</output></div>
+        <div class="setting-help">سرعت خواندن را با دقت تنظیم کنید.</div>
+        <div class="range-line"><input id="pace" type="range" min="0.7" max="1.35" step="0.05" value="1" dir="ltr" aria-label="سرعت گفتار"></div>
+        <div class="range-ends"><span>آرام‌تر</span><span>سریع‌تر</span></div>
+      </div>
+      <div class="settings-section">
+        <div class="setting-head"><strong>حجم صدا</strong><output id="volumeVal">۱۰۰٪</output></div>
+        <div class="setting-help">میزان بلندی پخش خروجی را تنظیم کنید.</div>
+        <div class="range-line"><input id="volume" type="range" min="0" max="1" step="0.05" value="1" dir="ltr" aria-label="حجم صدا"></div>
+        <div class="range-ends"><span>بی‌صدا</span><span>بلند</span></div>
+      </div>
+      <div class="settings-section mode-settings">
+        <div class="setting-head"><strong>حالت گفتار</strong></div>
+        <div class="setting-help">مکث‌های طبیعی بین جمله‌ها را انتخاب کنید.</div>
+        <div class="mode-switch-row">
+          <span id="modeState">مکث ویرگول‌ها</span>
+          <label class="switch">
+            <input id="modeSwitch" type="checkbox" aria-label="خوانش یکپارچه و روان">
+            <span class="switch-track" aria-hidden="true"><span></span></span>
+          </label>
+        </div>
+      </div>
+      <div class="engine-note"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 7v5l3 2"/><path d="M16 4h5v5"/></svg><span>تمام پردازش‌ها روی همین دستگاه انجام می‌شود؛ بدون ارسال متن به سرور.</span></div>
     </aside>
+  </section>
+
+  <div class="phoneme-editor" id="phEditor" hidden>
+    <section class="phoneme-modal" role="dialog" aria-modal="true" aria-labelledby="phTitle">
+      <div class="modal-header">
+        <div><div class="modal-kicker">PRONUNCIATION EDITOR</div><h2 id="phTitle">اصلاح تلفظ</h2></div>
+        <button class="modal-close" id="phClose" type="button" aria-label="بستن پنجره اصلاح تلفظ">×</button>
+      </div>
+      <div class="phoneme-label"><span>فونم قابل ویرایش</span><small>LATIN PHONEMES</small></div>
+      <textarea id="phInput" maxlength="2400" dir="ltr" spellcheck="false" placeholder="فونم تولیدشده اینجا نمایش داده می‌شود…"></textarea>
+      <div class="ph-hint">اگر تلفظ واژه‌ای اشتباه است، همان بخش را اصلاح کنید؛ مثلاً <b>tost</b> را به <b>test</b> تغییر دهید.</div>
+      <div class="phoneme-footer"><small>فقط حروف لاتین مجاز است</small><button class="secondary-action" id="phGo" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg><span>ساخت از فونم اصلاح‌شده</span></button></div>
+    </section>
   </div>
 
-  <section class="panel result" id="result">
-    <div class="label"><span>فونم‌های تولیدشده</span><span class="cnt" id="rmeta"></span></div>
-    <div class="ph" id="ph"></div>
-    <div class="player">
-      <button class="play" id="play">
+  <div class="post-card-row">
+    <div class="quick-tip"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5a6 6 0 1 1 7 0c-.8.6-1.2 1.4-1.2 2.5H9.7c0-1.1-.4-1.9-1.2-2.5Z"/></svg><span>برای بهترین نتیجه، از جمله‌های کوتاه و نشانه‌گذاری طبیعی استفاده کنید.</span></div>
+    <div class="shortcut-note"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> برای ساخت گفتار</div>
+  </div>
+
+</main>
+
+<footer>ساخته‌شده با <b>pocket-tts-farsi-v2</b> روی <b>ONNX Runtime</b> — کاملاً آفلاین، بدون GPU</footer>
+
+<div class="transport" id="transport" aria-hidden="true" aria-label="پخش‌کننده گفتار">
+  <div class="transport-inner">
+    <div class="transport-info">
+      <span class="transport-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2l2-6 3 12 3-16 3 16 2-6h3"/></svg></span>
+      <span class="transport-copy"><strong id="transportTitle">گفتار تولید شد</strong><small id="transportMeta">آماده پخش</small></span>
+    </div>
+    <div class="transport-main">
+      <button class="play" id="play" type="button" aria-label="پخش">
         <svg id="icPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         <svg id="icPause" viewBox="0 0 24 24" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
       </button>
-      <div class="wave" id="wave"><canvas id="cv"></canvas></div>
-      <div class="tm" id="tm">۰:۰۰ / ۰:۰۰</div>
-      <div class="dl" id="dl" title="دانلود WAV">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 21h16"/>
-        </svg>
-      </div>
+      <div class="timeline" id="wave" role="slider" aria-label="موقعیت پخش" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><canvas id="cv"></canvas></div>
+      <span class="time-display" id="tm">۰:۰۰ / ۰:۰۰</span>
     </div>
-  </section>
-
-  <section class="hist" id="histWrap" style="display:none">
-    <h2>تاریخچه</h2>
-    <div id="hist"></div>
-  </section>
-
-  <footer>ساخته‌شده با <b>pocket-tts-farsi-v2</b> روی <b>ONNX Runtime</b> — کاملاً آفلاین، بدون GPU</footer>
+    <div class="transport-actions"><button class="download-button" id="dl" type="button" aria-label="دانلود WAV"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 21h16"/></svg><span>دانلود WAV</span></button></div>
+  </div>
 </div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <audio id="au" preload="auto"></audio>
 
 <script>
 "use strict";
 const $ = id => document.getElementById(id);
 const fa = n => String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
-const fmt = s => { s = Math.max(0, s|0); return fa((s/60|0)) + ":" + fa(String(s%60).padStart(2,"0")); };
+const faNum = n => fa(n).replace(".", "٫");
+const fmt = seconds => {
+  const s = Math.max(0, Math.floor(Number(seconds) || 0));
+  return fa(Math.floor(s / 60)) + ":" + fa(String(s % 60).padStart(2, "0"));
+};
+const cssVar = (name, fallback) => (getComputedStyle(document.documentElement).getPropertyValue(name) || "").trim() || fallback;
+const ACCENT = cssVar("--accent", "#ff7a59");
+const ACCENT_2 = cssVar("--accent-2", "#ffb454");
+const au = $("au");
+const voiceWaveIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h2l2-6 3 12 3-16 3 16 2-6h3"/></svg>';
+const voiceMicIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
 
-// the waveform gradient follows the theme: read the CSS custom properties
-// once at load (no theme switching here, so the cache never goes stale)
-const cssVar = (name, fallback) =>
-  (getComputedStyle(document.documentElement).getPropertyValue(name) || "").trim() || fallback;
-const ACCENT = cssVar("--accent", "#ff7a59"), ACCENT_2 = cssVar("--accent-2", "#ffb454");
+let VOICES = [];
+let selVoice = null;
+let mode = "split";
+let MAX_TEXT = 800;
+let MAX_PHONEMES = 2400;
+let peaks = null;
+let curId = null;
+let curDur = 0;
+const HISTORY_KEY = "parsigo-history-v1";
+let history = readHistory();
+let audioUrl = null;
+let raf = 0;
+let seeking = false;
+let toastTimer = 0;
 
-let VOICES = [], selVoice = null;
-let peaks = null, curId = null, curDur = 0, history = [];
-
-/* ---------- voices ---------- */
-async function loadVoices() {
-  const r = await fetch("/api/voices").then(r => r.json());
-  VOICES = r.voices;
-  if (!selVoice || !VOICES.find(v => v.id === selVoice))
-    selVoice = (VOICES[0] || {}).id;
-  renderVoices();
+function readHistory() {
+  try {
+    const value = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    return Array.isArray(value) ? value.slice(0, 8) : [];
+  } catch (error) {
+    return [];
+  }
 }
+
+function saveHistory() {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 8)));
+  } catch (error) {
+  }
+}
+
+function voiceForId(id) {
+  return VOICES.find(voice => voice.id === id) || null;
+}
+
+function voiceName(id) {
+  const voice = voiceForId(id || selVoice);
+  return voice ? voice.name : "صدای انتخاب‌شده";
+}
+
+function setToast(message, kind = "") {
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.className = "toast show" + (kind ? " " + kind : "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.className = "toast"; }, 3200);
+}
+
+async function requestJson(url, options) {
+  const response = await fetch(url, options);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.detail) {
+    const detail = typeof data.detail === "string" ? data.detail : "درخواست انجام نشد";
+    throw new Error(detail);
+  }
+  return data;
+}
+
+function updateVoiceSummary() {
+  const voice = voiceForId(selVoice);
+  if (!voice) {
+    $("selectedVoiceName").textContent = "صدایی برای نمایش وجود ندارد";
+    $("selectedVoiceDesc").textContent = "بارگذاری دوباره را امتحان کنید";
+    $("selectedAvatar").innerHTML = voiceMicIcon;
+    return;
+  }
+  $("selectedVoiceName").textContent = voice.name;
+  $("selectedVoiceDesc").textContent = voice.desc || "صدای مرجع";
+  $("selectedAvatar").innerHTML = voice.id === selVoice ? voiceWaveIcon : voiceMicIcon;
+}
+
+function closeVoiceMenu() {
+  $("voiceMenu").hidden = true;
+  $("voiceSelect").setAttribute("aria-expanded", "false");
+}
+
 function renderVoices() {
-  $("voices").innerHTML = VOICES.map(v => `
-    <button class="vcard ${v.id===selVoice?"sel":""}" data-id="${v.id}">
-      <span class="ic">
-        ${v.id===selVoice
-          ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3 12h2l2-6 3 12 3-16 3 16 2-6h3"/></svg>'
-          : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>'}
-      </span>
-      <span><div class="nm">${v.name}</div><div class="ds">${v.desc}</div></span>
-    </button>`).join("");
-  document.querySelectorAll(".vcard").forEach(b =>
-    b.onclick = () => { selVoice = b.dataset.id; renderVoices(); });
+  const holder = $("voices");
+  holder.replaceChildren();
+  if (!VOICES.length) {
+    const empty = document.createElement("div");
+    empty.className = "voice-menu-title";
+    empty.textContent = "صدایی در دسترس نیست";
+    holder.append(empty);
+  }
+  VOICES.forEach(voice => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "vcard" + (voice.id === selVoice ? " sel" : "");
+    button.dataset.id = voice.id;
+    button.setAttribute("aria-pressed", voice.id === selVoice ? "true" : "false");
+    const icon = document.createElement("span");
+    icon.className = "vcard-icon";
+    icon.innerHTML = voice.id === selVoice ? voiceWaveIcon : voiceMicIcon;
+    const copy = document.createElement("span");
+    copy.className = "vcard-copy";
+    const name = document.createElement("strong");
+    name.textContent = voice.name;
+    const desc = document.createElement("small");
+    desc.textContent = voice.desc || "صدای مرجع";
+    copy.append(name, desc);
+    button.append(icon, copy);
+    if (voice.builtin) {
+      const tag = document.createElement("span");
+      tag.className = "voice-tag";
+      tag.textContent = "سیستمی";
+      button.append(tag);
+    }
+    button.addEventListener("click", () => {
+      selVoice = voice.id;
+      renderVoices();
+      updateVoiceSummary();
+      closeVoiceMenu();
+    });
+    holder.append(button);
+  });
+  updateVoiceSummary();
 }
 
-/* ---------- chips ---------- */
-const SAMPLES = [
+async function loadVoices() {
+  try {
+    const data = await requestJson("/api/voices");
+    VOICES = Array.isArray(data.voices) ? data.voices : [];
+    if (!voiceForId(selVoice)) selVoice = VOICES[0] ? VOICES[0].id : null;
+    renderVoices();
+  } catch (error) {
+    VOICES = [];
+    renderVoices();
+    setToast(error.message || "بارگذاری صداها انجام نشد", "error");
+  }
+}
+
+const samples = [
   "سلام، حال شما چطور است؟",
   "اقتصاد آمریکا را تا سال ۲۰۳۰ تغییر دهد.",
-  "امروز هوا ابری است اما باران نمی‌بارد.",
-  "دانشگاه تهران در سال ۱۳۱۳ تأسیس شد.",
+  "امروز هوا ابری است اما باران نمی‌بارد."
 ];
-$("chips").innerHTML = SAMPLES.map(s => `<button class="chip">${s}</button>`).join("");
-document.querySelectorAll(".chip").forEach(c => c.onclick = () => {
-  $("txt").value = c.textContent; count();
-});
-
-/* ---------- pace ---------- */
-const paceEl = $("pace");
-function faNum(x) { return fa(x).replace(".", "٫"); }
-function setPace(v, fromChip) {
-  paceEl.value = v;
-  $("paceVal").textContent = faNum((+v).toFixed(2)) + "×";
-  document.querySelectorAll(".pchip").forEach(c =>
-    c.classList.toggle("sel", Math.abs(+c.dataset.p - v) < 0.01));
-}
-paceEl.addEventListener("input", () => setPace(paceEl.value));
-document.querySelectorAll(".pchip").forEach(c =>
-  c.onclick = () => setPace(c.dataset.p));
-setPace(1);
-
-/* ---------- speech mode ---------- */
-let mode = "split";
-document.querySelectorAll(".pchip[data-m]").forEach(c =>
-  c.onclick = () => {
-    mode = c.dataset.m;
-    document.querySelectorAll(".pchip[data-m]").forEach(x => x.classList.toggle("sel", x === c));
+const chips = $("chips");
+samples.forEach(sample => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "chip";
+  button.textContent = sample;
+  button.addEventListener("click", () => {
+    $("txt").value = sample;
+    updateCounter();
+    $("txt").focus();
   });
-
-/* ---------- counter ---------- */
-let MAX_TEXT = 800;  // fallback until /api/config answers; the server enforces the cap
-$("txt").maxLength = MAX_TEXT;
-fetch("/api/config").then(r => r.json()).then(c => {
-  if (c.max_text) { MAX_TEXT = c.max_text; $("txt").maxLength = MAX_TEXT; count(); }
+  chips.append(button);
 });
-function count() { $("cnt").textContent = fa($("txt").value.length) + " / " + fa(MAX_TEXT); }
-$("txt").addEventListener("input", count); count();
 
-/* ---------- toast ---------- */
-let toastT;
-const TOAST_MS = 3200;
-function toast(msg) {
-  const t = $("toast"); t.textContent = msg; t.classList.add("show");
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), TOAST_MS);
+const paceEl = $("pace");
+const paceValue = $("paceVal");
+const volumeEl = $("volume");
+const volumeValue = $("volumeVal");
+const modeSwitch = $("modeSwitch");
+const paceChips = [...document.querySelectorAll(".pchip[data-p]")];
+
+function updateRangeFill(element) {
+  const min = Number(element.min);
+  const max = Number(element.max);
+  const value = Number(element.value);
+  const progress = ((value - min) / (max - min)) * 100;
+  element.style.setProperty("--range-progress", progress + "%");
 }
 
-/* ---------- upload ---------- */
-$("drop").onclick = () => $("file").click();
-$("drop").ondragover = e => { e.preventDefault(); $("drop").classList.add("over"); };
-$("drop").ondragleave = () => $("drop").classList.remove("over");
-$("drop").ondrop = e => { e.preventDefault(); $("drop").classList.remove("over");
-  if (e.dataTransfer.files[0]) sendFile(e.dataTransfer.files[0]); };
-$("file").onchange = e => { if (e.target.files[0]) sendFile(e.target.files[0]); e.target.value = ""; };
-
-async function sendFile(f) {
-  toast("در حال بارگذاری و پردازش صدا…");
-  const fd = new FormData(); fd.append("file", f);
-  const r = await fetch("/api/voice/upload", { method: "POST", body: fd }).then(r => r.json())
-    .catch(() => ({ detail: "خطای شبکه" }));
-  if (r.detail) return toast(typeof r.detail === "string" ? r.detail : "فایل پذیرفته نشد");
-  toast(`صدا اضافه شد (${fa(r.seconds)} ثانیه)`);
-  await loadVoices(); selVoice = r.id; renderVoices();
+function setPace(value) {
+  const next = Math.min(Number(paceEl.max), Math.max(Number(paceEl.min), Number(value)));
+  paceEl.value = next;
+  paceValue.textContent = faNum(Number(next).toFixed(2)) + "×";
+  paceChips.forEach(chip => chip.classList.toggle("sel", Math.abs(Number(chip.dataset.p) - next) < .01));
+  updateRangeFill(paceEl);
 }
 
-/* ---------- manual phonemes ---------- */
-$("phPrep").onclick = async () => {
-  const text = $("txt").value.trim();
-  if (!text) return toast("متنی بنویسید");
-  const b = $("phPrep"), old = b.textContent;
-  b.disabled = true; b.textContent = "در حال تبدیل متن به فونم…";
+function setVolume(value) {
+  const next = Math.min(Number(volumeEl.max), Math.max(Number(volumeEl.min), Number(value)));
+  volumeEl.value = next;
+  au.volume = next;
+  volumeValue.textContent = fa(Math.round(next * 100)) + "٪";
+  updateRangeFill(volumeEl);
+}
+
+paceEl.addEventListener("input", () => setPace(paceEl.value));
+volumeEl.addEventListener("input", () => setVolume(volumeEl.value));
+paceChips.forEach(chip => chip.addEventListener("click", () => setPace(chip.dataset.p)));
+setPace(1);
+setVolume(1);
+
+function modeLabel(value) {
+  return value === "pack" ? "یکپارچه و روان" : "مکث ویرگول‌ها";
+}
+
+function setMode(value) {
+  mode = value === "pack" ? "pack" : "split";
+  modeSwitch.checked = mode === "pack";
+  $("modeState").textContent = modeLabel(mode);
+}
+modeSwitch.addEventListener("change", () => setMode(modeSwitch.checked ? "pack" : "split"));
+setMode("split");
+
+function updateCounter() {
+  $("cnt").textContent = fa($("txt").value.length) + " / " + fa(MAX_TEXT);
+}
+$("txt").maxLength = MAX_TEXT;
+$("phInput").maxLength = MAX_PHONEMES;
+$("txt").addEventListener("input", updateCounter);
+updateCounter();
+fetch("/api/config").then(response => response.json()).then(config => {
+  if (config.max_text) {
+    MAX_TEXT = config.max_text;
+    $("txt").maxLength = MAX_TEXT;
+    updateCounter();
+  }
+  if (config.max_phonemes) {
+    MAX_PHONEMES = config.max_phonemes;
+    $("phInput").maxLength = MAX_PHONEMES;
+  }
+}).catch(() => {});
+
+$("voiceSelect").addEventListener("click", event => {
+  event.stopPropagation();
+  const menu = $("voiceMenu");
+  menu.hidden = !menu.hidden;
+  $("voiceSelect").setAttribute("aria-expanded", menu.hidden ? "false" : "true");
+});
+document.addEventListener("click", event => {
+  if (!event.target.closest(".voice-select-wrap")) closeVoiceMenu();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeVoiceMenu();
+});
+
+$("drop").addEventListener("click", () => $("file").click());
+$("drop").addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    $("file").click();
+  }
+});
+$("drop").addEventListener("dragover", event => {
+  event.preventDefault();
+  $("drop").classList.add("over");
+});
+$("drop").addEventListener("dragleave", () => $("drop").classList.remove("over"));
+$("drop").addEventListener("drop", event => {
+  event.preventDefault();
+  $("drop").classList.remove("over");
+  if (event.dataTransfer.files[0]) sendFile(event.dataTransfer.files[0]);
+});
+$("file").addEventListener("change", event => {
+  if (event.target.files[0]) sendFile(event.target.files[0]);
+  event.target.value = "";
+});
+
+async function sendFile(file) {
+  if (!/\.(wav|mp3|ogg|flac)$/i.test(file.name) && !file.type.startsWith("audio/")) {
+    setToast("فرمت صوتی پشتیبانی نمی‌شود", "error");
+    return;
+  }
+  setToast("در حال بارگذاری و پردازش صدا…");
+  const form = new FormData();
+  form.append("file", file);
   try {
-    const r = await fetch("/api/phonemize", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, mode }),
-    }).then(r => r.json());
-    if (r.detail) return toast(typeof r.detail === "string" ? r.detail : "خطا در تبدیل به فونم");
-    $("phInput").value = r.phonemes;
-    $("phEditor").classList.add("show");
-    $("phInput").focus();
-  } catch (e) { toast("ارتباط با سرور برقرار نشد"); }
-  finally { b.disabled = false; b.textContent = old; }
-};
+    const response = await fetch("/api/voice/upload", { method: "POST", body: form });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.detail) throw new Error(typeof data.detail === "string" ? data.detail : "فایل پذیرفته نشد");
+    await loadVoices();
+    selVoice = data.id;
+    renderVoices();
+    setToast("صدای شما اضافه شد");
+  } catch (error) {
+    setToast(error.message || "ارتباط با سرور برقرار نشد", "error");
+  }
+}
 
-$("phGo").onclick = async () => {
+function openPhEditor() {
+  const editor = $("phEditor");
+  editor.hidden = false;
+  editor.classList.add("open");
+  document.body.classList.add("modal-open");
+  $("phPrep").classList.add("open");
+  $("phPrep").setAttribute("aria-expanded", "true");
+  $("phInput").focus();
+}
+
+function closePhEditor() {
+  const editor = $("phEditor");
+  editor.classList.remove("open");
+  editor.hidden = true;
+  document.body.classList.remove("modal-open");
+  $("phPrep").classList.remove("open");
+  $("phPrep").setAttribute("aria-expanded", "false");
+  $("phPrep").focus();
+}
+
+$("phClose").addEventListener("click", closePhEditor);
+$("phEditor").addEventListener("click", event => {
+  if (event.target === event.currentTarget) closePhEditor();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !$("phEditor").hidden) closePhEditor();
+});
+
+$("phPrep").addEventListener("click", async () => {
+  const text = $("txt").value.trim();
+  if (!text) return setToast("متنی بنویسید", "error");
+  const button = $("phPrep");
+  const label = button.querySelector("span");
+  const old = label.textContent;
+  button.disabled = true;
+  label.textContent = "در حال تبدیل متن به فونم…";
+  try {
+    const data = await requestJson("/api/phonemize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, mode })
+    });
+    $("phInput").value = data.phonemes;
+    openPhEditor();
+  } catch (error) {
+    setToast(error.message || "تبدیل متن به فونم انجام نشد", "error");
+  } finally {
+    button.disabled = false;
+    label.textContent = old;
+  }
+});
+
+$("phGo").addEventListener("click", async () => {
   const phonemes = $("phInput").value.trim();
-  if (!phonemes) return toast("فونم خالی است");
-  const b = $("phGo"), old = b.textContent;
-  const t0 = performance.now();
-  b.disabled = true;
-  b.textContent = "در حال ساخت… ۰ ثانیه";
-  const tick = setInterval(() => {
-    b.textContent = `در حال ساخت… ${fa(((performance.now()-t0)/1000).toFixed(0))} ثانیه`;
+  if (!phonemes) return setToast("فونم خالی است", "error");
+  const button = $("phGo");
+  const label = button.querySelector("span");
+  const old = label.textContent;
+  const started = performance.now();
+  button.disabled = true;
+  label.textContent = "در حال ساخت… ۰ ثانیه";
+  const timer = setInterval(() => {
+    label.textContent = "در حال ساخت… " + fa(Math.floor((performance.now() - started) / 1000)) + " ثانیه";
   }, 250);
   try {
-    const r = await fetch("/api/tts-phonemes", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phonemes, voice: selVoice, pace: +paceEl.value }),
-    }).then(r => r.json());
-    if (r.detail) return toast(typeof r.detail === "string" ? r.detail : "خطا در تولید");
-    await present(r, $("txt").value.trim());
-  } catch (e) { toast("ارتباط با سرور برقرار نشد"); }
-  finally {
-    clearInterval(tick);
-    b.disabled = false;
-    b.textContent = old;
+    const data = await requestJson("/api/tts-phonemes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phonemes, voice: selVoice, pace: Number(paceEl.value) })
+    });
+    await present(data, $("txt").value.trim());
+    closePhEditor();
+  } catch (error) {
+    setToast(error.message || "تولید گفتار انجام نشد", "error");
+  } finally {
+    clearInterval(timer);
+    button.disabled = false;
+    label.textContent = old;
   }
-};
+});
 
-/* ---------- generate ---------- */
-$("go").onclick = async () => {
+function setGenerateBusy(busy) {
+  const button = $("go");
+  button.disabled = busy;
+  button.classList.toggle("busy", busy);
+  $("goLabel").textContent = busy ? "در حال ساخت…" : "ساخت گفتار";
+}
+
+async function generate() {
   const text = $("txt").value.trim();
-  if (!text) return toast("متنی بنویسید");
-  $("go").disabled = true; $("go").classList.add("busy");
-  const t0 = performance.now();
-  const tick = setInterval(() =>
-    $("go").querySelector(".tx").textContent = `در حال ساخت… ${fa(((performance.now()-t0)/1000).toFixed(0))} ثانیه`, 250);
+  if (!text) return setToast("متنی بنویسید", "error");
+  if (!selVoice) return setToast("ابتدا یک صدا انتخاب کنید", "error");
+  setGenerateBusy(true);
+  const started = performance.now();
+  const timer = setInterval(() => {
+    $("goLabel").textContent = "در حال ساخت… " + fa(Math.floor((performance.now() - started) / 1000)) + " ثانیه";
+  }, 250);
   try {
-    const r = await fetch("/api/tts", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, voice: selVoice, pace: +paceEl.value, mode }),
-    }).then(r => r.json());
-    if (r.detail) return toast(typeof r.detail === "string" ? r.detail : "خطا در تولید");
-    await present(r, text);
-  } catch (e) { toast("ارتباط با سرور برقرار نشد"); }
-  finally {
-    clearInterval(tick);
-    $("go").disabled = false; $("go").classList.remove("busy");
-    $("go").querySelector(".tx").innerHTML = `<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:flex"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><path d="M12 18v4"/></svg> ساخت گفتار`;
-  }
-};
-
-/* ---------- player ---------- */
-const cv = $("cv"), ctx = cv.getContext("2d");
-let raf;
-
-function drawCanvas(prog) {
-  const dpr = devicePixelRatio || 1;
-  const w = cv.clientWidth * dpr, h = cv.clientHeight * dpr;
-  if (cv.width !== w) { cv.width = w; cv.height = h; }
-  ctx.clearRect(0, 0, w, h);
-  if (!peaks) return;
-  const n = peaks.length, bw = w / n;
-  const mid = h / 2;
-  const g = ctx.createLinearGradient(0, 0, w, 0);
-  g.addColorStop(0, ACCENT); g.addColorStop(1, ACCENT_2);
-  for (let i = 0; i < n; i++) {
-    const bh = Math.max(3 * dpr, peaks[i] * h * 0.92);
-    const played = i / n <= prog;
-    ctx.fillStyle = played ? g : "rgba(140,148,170,.28)";
-    const x = w - (i + 1) * bw + bw * 0.18;   // RTL: time flows right→left
-    ctx.beginPath();
-    ctx.roundRect(x, mid - bh / 2, bw * 0.64, bh, bw * 0.32);
-    ctx.fill();
+    const data = await requestJson("/api/tts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, voice: selVoice, pace: Number(paceEl.value), mode })
+    });
+    await present(data, text);
+  } catch (error) {
+    setToast(error.message || "ارتباط با سرور برقرار نشد", "error");
+  } finally {
+    clearInterval(timer);
+    setGenerateBusy(false);
   }
 }
+
+$("go").addEventListener("click", generate);
 
 function computePeaks(data) {
-  const N = 160, step = Math.floor(data.length / N), p = new Array(N);
-  for (let i = 0; i < N; i++) {
-    let m = 0;
-    for (let j = 0; j < step; j += 16) m = Math.max(m, Math.abs(data[i * step + j]));
-    p[i] = m;
+  const count = 160;
+  const peaksData = new Array(count).fill(0);
+  if (!data.length) return peaksData;
+  const step = Math.max(1, Math.floor(data.length / count));
+  for (let i = 0; i < count; i++) {
+    let maximum = 0;
+    const start = i * step;
+    for (let j = start; j < Math.min(start + step, data.length); j += 16) maximum = Math.max(maximum, Math.abs(data[j]));
+    peaksData[i] = maximum;
   }
-  const mx = Math.max(...p, 0.01);
-  return p.map(v => v / mx);
+  const max = Math.max(...peaksData, .01);
+  return peaksData.map(value => value / max);
 }
 
-async function present(r, text) {
-  curId = r.id; curDur = r.duration;
-  $("result").classList.add("show");
-  $("ph").textContent = r.phonemes;
-  $("rmeta").textContent = `${fa(r.sentences)} جمله · ${fa(r.duration)} ثانیه`;
-  $("result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+function drawCanvas(progress) {
+  const canvas = $("cv");
+  const context = canvas.getContext("2d");
+  const dpr = devicePixelRatio || 1;
+  const width = canvas.clientWidth * dpr;
+  const height = canvas.clientHeight * dpr;
+  if (!width || !height) return;
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+  }
+  context.clearRect(0, 0, width, height);
+  if (!peaks) return;
+  const barWidth = width / peaks.length;
+  const middle = height / 2;
+  context.fillStyle = "rgba(140,148,170,.2)";
+  context.fillRect(0, middle - dpr, width, 2 * dpr);
+  const gradient = context.createLinearGradient(0, 0, width, 0);
+  gradient.addColorStop(0, ACCENT);
+  gradient.addColorStop(1, ACCENT_2);
+  peaks.forEach((value, index) => {
+    const barHeight = Math.max(2 * dpr, value * height * .34);
+    const played = index / peaks.length <= progress;
+    context.fillStyle = played ? gradient : "rgba(140,148,170,.28)";
+    const x = width - (index + 1) * barWidth + barWidth * .22;
+    const y = middle - barHeight / 2;
+    const w = barWidth * .56;
+    const h = barHeight;
+    context.beginPath();
+    if (context.roundRect) context.roundRect(x, y, w, h, Math.min(w / 2, 3 * dpr));
+    else context.rect(x, y, w, h);
+    context.fill();
+  });
+}
 
-  // decode for the waveform
-  const buf = await fetch(`/api/audio/${r.id}`).then(x => x.arrayBuffer());
-  const actx = new (window.AudioContext || window.webkitAudioContext)();
-  const ab = await actx.decodeAudioData(buf.slice(0));
-  peaks = computePeaks(ab.getChannelData(0));
+function draw(progress) {
+  const value = Number.isFinite(progress) ? Math.max(0, Math.min(1, progress)) : 0;
+  drawCanvas(value);
+  $("tm").textContent = fmt((value || 0) * curDur) + " / " + fmt(curDur);
+  $("wave").setAttribute("aria-valuenow", Math.round(value * 100));
+  if (au && !au.paused && !au.ended) {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => draw(au.duration ? au.currentTime / au.duration : 0));
+  }
+}
 
-  const au = $("au");
-  au.src = URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
-  au.onloadedmetadata = () => { curDur = au.duration; draw(0); };
-  au.ontimeupdate = () => { if (! seeking) draw(au.currentTime / au.duration); };
+function setPlayIcon(playing) {
+  $("icPlay").style.display = playing ? "none" : "block";
+  $("icPause").style.display = playing ? "block" : "none";
+  $("play").setAttribute("aria-label", playing ? "توقف" : "پخش");
+}
+
+async function present(data, text) {
+  curId = data.id;
+  curDur = Number(data.duration) || 0;
+  const voice = voiceName(selVoice);
+  $("transportTitle").textContent = "گفتار تولید شد";
+  $("transportMeta").textContent = voice + " · " + fa(data.duration) + " ثانیه";
+  $("transport").classList.add("show");
+  $("transport").setAttribute("aria-hidden", "false");
+  const response = await fetch("/api/audio/" + encodeURIComponent(data.id));
+  if (!response.ok) throw new Error("دریافت فایل صوتی انجام نشد");
+  const buffer = await response.arrayBuffer();
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const decoded = await audioContext.decodeAudioData(buffer.slice(0));
+  peaks = computePeaks(decoded.getChannelData(0));
+  if (audioUrl) URL.revokeObjectURL(audioUrl);
+  audioUrl = URL.createObjectURL(new Blob([buffer], { type: "audio/wav" }));
+  au.src = audioUrl;
+  au.onloadedmetadata = () => {
+    curDur = Number(au.duration) || curDur;
+    draw(0);
+  };
+  au.ontimeupdate = () => { if (!seeking) draw(au.duration ? au.currentTime / au.duration : 0); };
   au.onended = () => setPlayIcon(false);
-  history.unshift({ id: r.id, text, dur: r.duration });
-  renderHistory();
+  history = [{ id: data.id, text: text || data.phonemes, dur: data.duration, voice: voice, phonemes: data.phonemes, mode: data.mode }, ...history.filter(item => item.id !== data.id)].slice(0, 8);
+  saveHistory();
   draw(0);
   setPlayIcon(false);
   au.play().then(() => setPlayIcon(true)).catch(() => {});
 }
 
-let seeking = false;
-function draw(t) {
-  drawCanvas(t || 0);
-  $("tm").textContent = `${fmt((t || 0) * curDur)} / ${fmt(curDur)}`;
-  if (au && !au.paused && !au.ended) raf = requestAnimationFrame(() => draw(au.currentTime / au.duration));
-}
-const au = $("au");
-function setPlayIcon(playing) {
-  $("icPlay").style.display = playing ? "none" : "block";
-  $("icPause").style.display = playing ? "block" : "none";
-  if (playing) raf = requestAnimationFrame(() => draw(au.currentTime / au.duration));
-}
-$("play").onclick = () => {
+$("play").addEventListener("click", () => {
   if (!au.src) return;
-  if (au.paused) { au.play(); setPlayIcon(true); } else { au.pause(); setPlayIcon(false); }
-};
-// click-to-seek on the waveform (RTL mapping)
-$("wave").addEventListener("pointerdown", e => {
-  if (!au.src || !peaks) return;
-  seeking = true;
-  const rect = cv.getBoundingClientRect();
-  const frac = Math.min(1, Math.max(0, (rect.right - e.clientX) / rect.width));
-  au.currentTime = frac * curDur; draw(frac);
-  const move = ev => {
-    const f = Math.min(1, Math.max(0, (rect.right - ev.clientX) / rect.width));
-    au.currentTime = f * curDur; draw(f);
-  };
-  const up = () => { seeking = false; removeEventListener("pointermove", move); removeEventListener("pointerup", up); };
-  addEventListener("pointermove", move); addEventListener("pointerup", up);
+  if (au.paused) au.play().then(() => setPlayIcon(true)).catch(() => setToast("پخش در این مرورگر مجاز نیست", "error"));
+  else {
+    au.pause();
+    setPlayIcon(false);
+  }
 });
-$("dl").onclick = () => {
-  if (!curId) return;
-  const a = document.createElement("a");
-  a.href = `/api/audio/${curId}`; a.download = "parsigo.wav"; a.click();
-};
 
-/* ---------- history ---------- */
-const HISTORY_SHOWN = 8;  // rows rendered; older entries stay in `history`
-function renderHistory() {
-  $("histWrap").style.display = history.length ? "block" : "none";
-  $("hist").innerHTML = history.slice(0, HISTORY_SHOWN).map((h, i) => `
-    <div class="hrow" data-i="${i}">
-      <span class="hplay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-      <span class="htx">${h.text}</span>
-      <span class="hd">${fa(h.dur)} ثانیه</span>
-    </div>`).join("");
-  document.querySelectorAll(".hrow").forEach(row => row.onclick = () => {
-    const h = history[+row.dataset.i];
-    au.src = `/api/audio/${h.id}`; curDur = h.dur; curId = h.id;
-    $("result").classList.add("show");
-    fetch(`/api/audio/${h.id}`).then(x => x.arrayBuffer()).then(async buf => {
-      const actx = new (window.AudioContext || window.webkitAudioContext)();
-      const ab = await actx.decodeAudioData(buf.slice(0));
-      peaks = computePeaks(ab.getChannelData(0));
-      draw(0);
-    });
-    au.play().then(() => setPlayIcon(true)).catch(() => {});
-  });
+$("wave").addEventListener("pointerdown", event => {
+  if (!au.src || !peaks || !curDur) return;
+  seeking = true;
+  const rect = $("cv").getBoundingClientRect();
+  const update = position => {
+    const fraction = Math.max(0, Math.min(1, (rect.right - position) / rect.width));
+    au.currentTime = fraction * curDur;
+    draw(fraction);
+  };
+  update(event.clientX);
+  const move = moveEvent => update(moveEvent.clientX);
+  const up = () => {
+    seeking = false;
+    removeEventListener("pointermove", move);
+    removeEventListener("pointerup", up);
+  };
+  addEventListener("pointermove", move);
+  addEventListener("pointerup", up);
+});
+
+$("wave").addEventListener("keydown", event => {
+  if (!au.src || !curDur) return;
+  if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+    event.preventDefault();
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    au.currentTime = Math.max(0, Math.min(curDur, au.currentTime + direction * 2));
+    draw(au.currentTime / curDur);
+  }
+});
+
+$("dl").addEventListener("click", () => {
+  if (!curId) return;
+  const link = document.createElement("a");
+  link.href = "/api/audio/" + encodeURIComponent(curId);
+  link.download = "parsigo.wav";
+  link.click();
+});
+
+const navButtons = [...document.querySelectorAll(".nav-link[data-scroll]")];
+navButtons.forEach(button => button.addEventListener("click", () => {
+  const target = $(button.dataset.scroll);
+  if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+}));
+if ("IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(entries => {
+    const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    if (!visible) return;
+    navButtons.forEach(button => button.classList.toggle("active", button.dataset.scroll === visible.target.id));
+  }, { rootMargin: "-20% 0px -65% 0px", threshold: [0, .2, .6] });
+  [$("studio")].filter(Boolean).forEach(target => observer.observe(target));
 }
 
-addEventListener("resize", () => draw(au.currentTime / (curDur || 1)));
+document.addEventListener("keydown", event => {
+  if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+    event.preventDefault();
+    if (!$("go").disabled) generate();
+  }
+  if (event.code === "Space" && curId && !["INPUT", "TEXTAREA", "BUTTON"].includes(document.activeElement.tagName)) {
+    event.preventDefault();
+    $("play").click();
+  }
+});
+
+window.addEventListener("resize", () => draw(au.duration ? au.currentTime / au.duration : 0));
 loadVoices();
 </script>
 </body>

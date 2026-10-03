@@ -23,12 +23,14 @@ import soundfile as sf
 import uvicorn
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 BASE = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE / "scripts"))
 
 WEB = BASE / "web" / "index.html"
+HISTORY_WEB = BASE / "web" / "history.html"
 UPLOAD_DIR = BASE / "uploads" / "voices"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -43,6 +45,7 @@ BUILTIN_VOICE_META = {
 }
 
 app = FastAPI(title="پارسی‌گو — Persian TTS demo")
+app.mount("/fonts", StaticFiles(directory=BASE / "web" / "fonts"), name="fonts")
 
 _engine = None
 _engine_lock = threading.Lock()
@@ -125,6 +128,21 @@ class PhonemeTTSRequest(BaseModel):
 @app.get("/")
 def index():
     return FileResponse(WEB)
+
+
+@app.get("/history")
+def history_page():
+    return FileResponse(HISTORY_WEB)
+
+
+@app.get("/history/")
+def history_page_slash():
+    return FileResponse(HISTORY_WEB)
+
+
+@app.get("/history.html")
+def history_file():
+    return FileResponse(HISTORY_WEB)
 
 
 @app.get("/api/voices")

@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 env/
+.venv/
 
 # Model weights — large binaries, regenerable:
 #   model/onnx/  -> scripts/export_unified.py (needs model/v2 + model/g2p)

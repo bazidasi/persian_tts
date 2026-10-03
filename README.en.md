@@ -1,21 +1,13 @@
 <div align="center">
 
-<img src="web/logo.png" width="128" alt="ParSiGo logo">
-
 <h1 align="center">ParSiGo (Persian Text-to-Speech)</h1>
 
 <p align="center"><b>pocket-tts-farsi-v2 — ONNX version setup</b></p>
 
 **Persian** | [English](README.en.md)
 
-<a href="docs/demo.mp4"><img src="docs/demo-poster.jpg" width="640" alt="ParSiGo video demo — picking a reference voice, typing text and synthesising speech in the web app"></a>
-
-https://github.com/user-attachments/assets/dfc735c3-65fb-473a-a437-747efd8ede20
-
-🎬 **70-second video demo (with audio)** — picking a reference voice,
-synthesising a sample sentence, uploading a 5-second voice clip and cloning it onto a long paragraph.
-(downloadable copy in the repo: [docs/demo.mp4](docs/demo.mp4) — poster:
-[docs/demo-poster.jpg](docs/demo-poster.jpg))
+🎬 [70-second video demo](https://github.com/user-attachments/assets/dfc735c3-65fb-473a-a437-747efd8ede20)
+— downloadable copy in the repo: [docs/demo.mp4](docs/demo.mp4)
 
 </div>
 
@@ -172,8 +164,6 @@ for f in config.json generation_config.json tokenizer_config.json added_tokens.j
 ```
 
 Then in browser: http://127.0.0.1:8000
-
-![ParSiGo web demo screenshot](web/readme-demo.png)
 
 ### How to Use the Demo
 
